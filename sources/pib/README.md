@@ -13,8 +13,12 @@ To pull the actual documents, run the bundled script from any machine with norma
 internet access:
 
 ```bash
-bash download_all.sh      # saves HTML into ./downloads/
+bash download_all.sh      # renders each page to PDF in ./downloads/
 ```
+
+Each page is printed to **PDF** via headless Chromium (falls back to wkhtmltopdf,
+then to saving raw HTML if no PDF engine is present). Chromium/Chrome must be
+installed; set `CHROME_BIN` if it's in a non-standard path.
 
 If a URL fails from a script, open it in a browser — PIB occasionally blocks
 non-browser clients.
