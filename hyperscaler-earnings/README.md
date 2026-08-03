@@ -48,8 +48,10 @@ public-cloud segment); see the AI-capex table below.*
 | Oracle | ~$55.7B (FY26 total) | ~$50B FY2026 guide | **$55.7B FY26 actual; ~$70B net FY27** | ↑ above prior guide |
 | Meta | $31.1B (Q2) | $125B–$145B CY2026 | **$130B–$145B CY2026** | ↑ low end raised |
 
-For the **exact capex quote from each call**, see
-[capex-quotes.md](./capex-quotes.md).
+For the **exact capex quote from each call**, see [capex-quotes.md](./capex-quotes.md)
+(rendered: [capex-extracts.html](./capex-extracts.html)). For the **data-center demand** read —
+backlog/RPO, demand-vs-supply, capacity delivery — see [dc-demand-quotes.md](./dc-demand-quotes.md)
+(rendered: [dc-demand-extracts.html](./dc-demand-extracts.html)).
 
 *Microsoft is the only one to move guidance down — and that reflects an accounting change
 (lengthening assumed asset useful life to 25 years from 15), not reduced physical buildout.
