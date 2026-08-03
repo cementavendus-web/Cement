@@ -1,26 +1,26 @@
-<title>Hyperscaler Earnings — Key Capex & Demand Points</title>
+<title>Hyperscaler Earnings — Key Points by Company</title>
 <style>
   :root{
     --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#8C949B; --faint:#AEB5BB;
     --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#123A33; --mark2:#FBD5A8; --mark2-ink:#5A3612;
-    --accent:#0E7C6F; --accent2:#C2711C; --bullet:#C4CCd0;
+    --accent:#0E7C6F; --lblbg:#F2F4F5; --lblink:#7A828A;
   }
   @media (prefers-color-scheme:dark){
     :root{
       --bg:#0F1416; --ink:#C6CDD2; --strong:#EEF2F4; --muted:#828B92; --faint:#5E676E;
       --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --mark2:#5A3C18; --mark2-ink:#F6D9B4;
-      --accent:#4FC8B8; --accent2:#E7A657; --bullet:#3A444A;
+      --accent:#4FC8B8; --lblbg:#1B2225; --lblink:#8A939A;
     }
   }
   :root[data-theme="light"]{
     --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#8C949B; --faint:#AEB5BB;
     --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#123A33; --mark2:#FBD5A8; --mark2-ink:#5A3612;
-    --accent:#0E7C6F; --accent2:#C2711C; --bullet:#C4CCd0;
+    --accent:#0E7C6F; --lblbg:#F2F4F5; --lblink:#7A828A;
   }
   :root[data-theme="dark"]{
     --bg:#0F1416; --ink:#C6CDD2; --strong:#EEF2F4; --muted:#828B92; --faint:#5E676E;
     --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --mark2:#5A3C18; --mark2-ink:#F6D9B4;
-    --accent:#4FC8B8; --accent2:#E7A657; --bullet:#3A444A;
+    --accent:#4FC8B8; --lblbg:#1B2225; --lblink:#8A939A;
   }
   *{box-sizing:border-box}
   body{
@@ -31,75 +31,106 @@
   .wrap{max-width:820px; margin:0 auto; padding:60px 28px 92px}
   .eyebrow{font-size:11.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); font-weight:640; margin:0 0 10px}
   h1{font-size:clamp(22px,3.4vw,29px); line-height:1.2; letter-spacing:-.015em; color:var(--strong); font-weight:680; margin:0 0 10px; text-wrap:balance}
-  .sub{font-size:14.5px; color:var(--muted); margin:0 0 6px; max-width:66ch}
+  .sub{font-size:14.5px; color:var(--muted); margin:0; max-width:66ch}
   .sub mark{padding:.02em .2em}
 
-  h2{
-    font-size:12px; letter-spacing:.13em; text-transform:uppercase; font-weight:700;
-    color:var(--strong); margin:44px 0 2px; padding-top:22px; border-top:1px solid var(--rule);
-  }
-  h2 .hint{font-size:11px; letter-spacing:.02em; text-transform:none; font-weight:500; color:var(--muted); margin-left:8px}
-  ul{list-style:none; margin:14px 0 0; padding:0}
+  .company{padding-top:26px; margin-top:30px; border-top:1px solid var(--rule)}
+  .company:first-of-type{border-top:none; margin-top:22px}
+  .co-head{display:flex; align-items:center; gap:11px; margin-bottom:8px}
+  .dot{width:11px; height:11px; border-radius:50%; flex:0 0 auto}
+  .co-name{font-size:18px; font-weight:720; color:var(--strong); letter-spacing:-.01em}
+  .co-tag{margin-left:auto; font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+
+  ul{list-style:none; margin:6px 0 0; padding:0}
   li{
-    position:relative; padding:9px 0 9px 22px; font-size:15.5px; line-height:1.62;
-    border-bottom:1px solid var(--rule); max-width:76ch;
+    display:grid; grid-template-columns:96px 1fr; gap:14px; align-items:start;
+    padding:10px 0; border-bottom:1px solid var(--rule); font-size:15px; line-height:1.6;
   }
   li:last-child{border-bottom:none}
-  li::before{
-    content:""; position:absolute; left:2px; top:16px; width:6px; height:6px;
-    border-radius:50%; background:var(--bullet);
+  .lbl{
+    font-size:10px; letter-spacing:.07em; text-transform:uppercase; font-weight:680;
+    color:var(--lblink); background:var(--lblbg); padding:3px 8px; border-radius:5px;
+    text-align:center; margin-top:2px; white-space:nowrap;
   }
-  .co{font-weight:680; color:var(--strong)}
-  .ctx{color:var(--muted); font-size:13.5px}
-  .q{color:var(--ink)}
+  .body{color:var(--ink); max-width:66ch}
+  .who{color:var(--muted); font-size:13px}
   mark{background:var(--mark); color:var(--mark-ink); padding:.04em .05em; border-radius:2px; box-decoration-break:clone; -webkit-box-decoration-break:clone}
   mark.d{background:var(--mark2); color:var(--mark2-ink)}
-  .note{color:var(--faint); font-size:13px}
+  .rep{color:var(--faint); font-size:12px; font-style:italic}
+  .aside{color:var(--faint); font-size:12.5px}
 
   footer{margin-top:44px; padding-top:22px; border-top:1px solid var(--rule); font-size:12px; color:var(--muted); line-height:1.6}
   footer b{color:var(--ink); font-weight:620}
   .xref{font-size:13px; color:var(--faint); margin-top:8px}
   .xref a{color:var(--accent); text-decoration:none}
   .xref a:hover{text-decoration:underline}
-  @media (max-width:520px){ .wrap{padding:40px 16px 68px} }
+  @media (max-width:560px){
+    .wrap{padding:40px 16px 68px}
+    li{grid-template-columns:1fr; gap:5px}
+    .lbl{justify-self:start}
+  }
 </style>
 
 <div class="wrap">
   <p class="eyebrow">Hyperscaler earnings · latest calls</p>
-  <h1>Key capex &amp; data-center demand points — in their own words</h1>
-  <p class="sub">Verbatim from the official transcripts, speaker (CEO/CFO) named, key figures
-  highlighted — <mark>capex</mark> teal, <mark class="d">demand</mark> amber.</p>
+  <h1>Key points by company — capex &amp; data-center demand</h1>
+  <p class="sub">Per company: latest capex guidance, the previous quarter’s guidance, and the
+  data-center demand read. Verbatim from the official transcripts (previous capex from reporting),
+  speaker named, figures highlighted — <mark>capex</mark> teal, <mark class="d">demand</mark> amber.</p>
 
-  <h2>Latest capex guidance <span class="hint">2026 · current calls</span></h2>
-  <ul>
-    <li><span class="co">Amazon</span> <span class="ctx">(Q2’26 · Jul 30 · Andy Jassy, CEO)</span> — <span class="q">“…<mark>approximately $220 billion in cash CapEx in 2026</mark>, the higher cost of memory pushing this number up from our prior estimate of about $200 billion…”</span></li>
-    <li><span class="co">Microsoft</span> <span class="ctx">(FY26 Q4 · Jul 29 · Amy Hood, CFO)</span> — <span class="q">“…the shift from finance to operating leases adjusts our expectation to <mark>approximately $175 billion</mark>.”</span> <span class="note">(accounting change, not a cut)</span></li>
-    <li><span class="co">Meta</span> <span class="ctx">(Q2’26 · Jul 29 · Susan Li, CFO)</span> — <span class="q">“…<mark>$130 billion to $145 billion</mark>, narrowed from our prior outlook of $125 billion to $145 billion.”</span></li>
-    <li><span class="co">Alphabet</span> <span class="ctx">(Q2’26 · Jul 22 · Anat Ashkenazi, CFO)</span> — <span class="q">“…full year 2026 CapEx guidance range to <mark>$195 billion to $205 billion</mark>, up from… $180 billion to $190 billion.”</span></li>
-    <li><span class="co">Oracle</span> <span class="ctx">(FY26 Q4 · Jun 10 · Hilary Maxson, CFO)</span> — <span class="q">“…fiscal year 2027 with an expected net cash outlay… of <mark>around $70 billion</mark>…”</span></li>
-  </ul>
+  <!-- AMAZON -->
+  <section class="company">
+    <div class="co-head"><span class="dot" style="background:#FF9900"></span><span class="co-name">Amazon</span><span class="co-tag">AWS · Q2 2026</span></div>
+    <ul>
+      <li><span class="lbl">Capex · now</span><div class="body">“…<mark>approximately $220 billion in cash CapEx in 2026</mark>, the higher cost of memory pushing this up from our prior estimate of about $200 billion…” <span class="who">— Andy Jassy, CEO · Jul 30</span></div></li>
+      <li><span class="lbl">Capex · prev</span><div class="body">“…invest <mark>about $200 billion</mark> in capital expenditures across Amazon in 2026…” <span class="who">— Andy Jassy, CEO · Q4’25, Feb 5</span> <span class="rep">reported</span></div></li>
+      <li><span class="lbl">Demand</span><div class="body">“…backlog stands at <mark class="d">$496 billion</mark>… <mark class="d">still not have enough capacity to meet all the demand</mark>… the demand we already have for 2028 is striking.” <span class="who">— Andy Jassy, CEO</span></div></li>
+    </ul>
+  </section>
 
-  <h2>Previous capex guidance <span class="hint">prior calls · reported</span></h2>
-  <ul>
-    <li><span class="co">Amazon</span> <span class="ctx">(Q4’25 · Feb 5 · Jassy, CEO)</span> — <span class="q">“…invest <mark>about $200 billion</mark> in capital expenditures across Amazon in 2026…”</span></li>
-    <li><span class="co">Microsoft</span> <span class="ctx">(FY26 Q3 · Apr 29 · Hood, CFO)</span> — <span class="q">“…calendar year 2026… <mark>roughly $190 billion</mark>… includes ~$25B from higher component pricing.”</span></li>
-    <li><span class="co">Meta</span> <span class="ctx">(Q1’26 · Apr 29 · Li, CFO)</span> — <span class="q">“…<mark>$125 billion to $145 billion</mark>, increased from our prior range of $120 to $135 billion.”</span></li>
-    <li><span class="co">Alphabet</span> <span class="ctx">(Q1’26 · Apr 29 · Ashkenazi, CFO)</span> — <span class="q">“…<mark>$180 billion to $190 billion</mark>, up from… $175 to $185 billion… to include… Intersect.”</span></li>
-    <li><span class="co">Oracle</span> <span class="ctx">(Q3 FY26 · Mar 10)</span> — <span class="q">FY26 capex of <mark>~$50 billion</mark> (unchanged guide).</span></li>
-  </ul>
+  <!-- MICROSOFT -->
+  <section class="company">
+    <div class="co-head"><span class="dot" style="background:#0078D4"></span><span class="co-name">Microsoft</span><span class="co-tag">Azure · FY26 Q4</span></div>
+    <ul>
+      <li><span class="lbl">Capex · now</span><div class="body">“…the shift from finance to operating leases adjusts our expectation to <mark>approximately $175 billion</mark>.” <span class="aside">(accounting change, not a cut)</span> <span class="who">— Amy Hood, CFO · Jul 29</span></div></li>
+      <li><span class="lbl">Capex · prev</span><div class="body">“For calendar year 2026… <mark>roughly $190 billion</mark>… includes ~$25B from higher component pricing.” <span class="who">— Amy Hood, CFO · FY26 Q3, Apr 29</span> <span class="rep">reported</span></div></li>
+      <li><span class="lbl">Demand</span><div class="body">“…RPO grew 84% to <mark class="d">$678 billion</mark>… <mark class="d">customer demand continues to exceed supply</mark>.” <span class="who">— Amy Hood, CFO</span></div></li>
+    </ul>
+  </section>
 
-  <h2>Data-center demand <span class="hint">latest calls</span></h2>
-  <ul>
-    <li><span class="co">Amazon</span> <span class="ctx">(Jassy, CEO)</span> — <span class="q">“…backlog stands at <mark class="d">$496 billion</mark>… <mark class="d">still not have enough capacity to meet all the demand</mark> we have in 2026… the demand we already have for 2028 is striking.”</span></li>
-    <li><span class="co">Microsoft</span> <span class="ctx">(Hood, CFO)</span> — <span class="q">“…RPO grew 84% to <mark class="d">$678 billion</mark>… <mark class="d">customer demand continues to exceed supply</mark>.”</span></li>
-    <li><span class="co">Alphabet</span> <span class="ctx">(Pichai, CEO)</span> — <span class="q">“…<mark class="d">strong demand for AI infrastructure</mark>… cloud backlog grew to <mark class="d">$514 billion</mark>.”</span></li>
-    <li><span class="co">Meta</span> <span class="ctx">(Li, CFO)</span> — <span class="q">“…we are… <mark class="d">demand-constrained</mark>… numerous ROI-positive places that we would put Compute toward if we had it.”</span></li>
-    <li><span class="co">Oracle</span> <span class="ctx">(Magouyrk, CEO)</span> — <span class="q">“…$67 billion in AI infrastructure contracts… delivered more than <mark class="d">1.2 gigawatts</mark>… FY’27 Q1 approaching 1 gigawatt.”</span></li>
-  </ul>
+  <!-- ALPHABET -->
+  <section class="company">
+    <div class="co-head"><span class="dot" style="background:#4285F4"></span><span class="co-name">Alphabet</span><span class="co-tag">Google Cloud · Q2 2026</span></div>
+    <ul>
+      <li><span class="lbl">Capex · now</span><div class="body">“…full year 2026 CapEx guidance range to <mark>$195 billion to $205 billion</mark>, up from our previous estimate of $180 billion to $190 billion.” <span class="who">— Anat Ashkenazi, CFO · Jul 22</span></div></li>
+      <li><span class="lbl">Capex · prev</span><div class="body">“…<mark>$180 billion to $190 billion</mark>, up from… $175 to $185 billion… to include… Intersect.” <span class="who">— Anat Ashkenazi, CFO · Q1’26, Apr 29</span> <span class="rep">reported</span></div></li>
+      <li><span class="lbl">Demand</span><div class="body">“…<mark class="d">strong demand for AI infrastructure</mark>… cloud backlog grew to <mark class="d">$514 billion</mark>.” <span class="who">— Sundar Pichai, CEO</span></div></li>
+    </ul>
+  </section>
 
-  <footer><b>Sourcing.</b> Latest-call and demand quotes are verbatim from the official
-  transcripts; previous-capex quotes are from published reporting of the prior calls (tagged
-  “reported”). Ellipses mark trimmed connective text.
+  <!-- META -->
+  <section class="company">
+    <div class="co-head"><span class="dot" style="background:#0866FF"></span><span class="co-name">Meta</span><span class="co-tag">AI infra · Q2 2026</span></div>
+    <ul>
+      <li><span class="lbl">Capex · now</span><div class="body">“…<mark>$130 billion to $145 billion</mark>, narrowed from our prior outlook of $125 billion to $145 billion.” <span class="who">— Susan Li, CFO · Jul 29</span></div></li>
+      <li><span class="lbl">Capex · prev</span><div class="body">“…<mark>$125 billion to $145 billion</mark>, increased from our prior range of $120 to $135 billion.” <span class="who">— Susan Li, CFO · Q1’26, Apr 29</span> <span class="rep">reported</span></div></li>
+      <li><span class="lbl">Demand</span><div class="body">“…we are… <mark class="d">demand-constrained</mark>… numerous ROI-positive places that we would put Compute toward if we had it.” <span class="who">— Susan Li, CFO</span></div></li>
+    </ul>
+  </section>
+
+  <!-- ORACLE -->
+  <section class="company">
+    <div class="co-head"><span class="dot" style="background:#C74634"></span><span class="co-name">Oracle</span><span class="co-tag">OCI · FY26 Q4</span></div>
+    <ul>
+      <li><span class="lbl">Capex · now</span><div class="body">“…fiscal year 2027 with an expected net cash outlay for capital expenditures of <mark>around $70 billion</mark>…” <span class="aside">(reported capex ~$20–25B higher)</span> <span class="who">— Hilary Maxson, CFO · Jun 10</span></div></li>
+      <li><span class="lbl">Capex · prev</span><div class="body">FY2026 capex of <mark>~$50 billion</mark> — an unchanged guide at the time. <span class="who">— Q3 FY26 guidance, Mar 10</span> <span class="rep">reported</span></div></li>
+      <li><span class="lbl">Demand</span><div class="body">“…$67 billion in AI infrastructure contracts… delivered more than <mark class="d">1.2 gigawatts</mark>… FY’27 Q1 approaching 1 gigawatt.” <span class="who">— Clay Magouyrk, CEO</span></div></li>
+    </ul>
+  </section>
+
+  <footer><b>Sourcing.</b> “Capex · now” and “Demand” quotes are verbatim from the official
+  transcripts; “Capex · prev” quotes are from published reporting of the prior calls. Ellipses
+  mark trimmed connective text.
   <div class="xref">Full card views: <a href="./capex-extracts.html">capex-extracts.html</a> ·
   <a href="./dc-demand-extracts.html">dc-demand-extracts.html</a> ·
   <a href="./previous-guidance-extracts.html">previous-guidance-extracts.html</a></div></footer>
