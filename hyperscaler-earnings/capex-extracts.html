@@ -1,284 +1,135 @@
 <title>Hyperscaler Capex — Verbatim Earnings-Call Extracts</title>
 <style>
   :root{
-    --bg:#FAFBFC; --card:#FFFFFF; --ink:#18211A; --ink-strong:#0E1512;
-    --muted:#5C6771; --faint:#8A959D; --line:#E6EAED; --line-2:#EEF1F3;
-    --mark:#BDE3DB; --mark-ink:#0C3B34; --accent:#0E7C6F;
-    --chip:#F3F5F6; --up:#1F7A4D; --down:#B4632A;
-    --shadow:0 1px 2px rgba(16,24,28,.04), 0 6px 20px rgba(16,24,28,.05);
+    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8;
+    --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#1F2A28; --accent:#0E7C6F;
   }
   @media (prefers-color-scheme:dark){
     :root{
-      --bg:#0E1315; --card:#151B1E; --ink:#D9E0E2; --ink-strong:#F1F5F6;
-      --muted:#939EA5; --faint:#6C767D; --line:#232B2F; --line-2:#1C2327;
-      --mark:#1F4D46; --mark-ink:#CFEDE6; --accent:#4FC8B8;
-      --chip:#1B2225; --up:#5FCB8E; --down:#E0975C;
-      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+      --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C;
+      --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --accent:#4FC8B8;
     }
   }
   :root[data-theme="light"]{
-    --bg:#FAFBFC; --card:#FFFFFF; --ink:#18211A; --ink-strong:#0E1512;
-    --muted:#5C6771; --faint:#8A959D; --line:#E6EAED; --line-2:#EEF1F3;
-    --mark:#BDE3DB; --mark-ink:#0C3B34; --accent:#0E7C6F;
-    --chip:#F3F5F6; --up:#1F7A4D; --down:#B4632A;
-    --shadow:0 1px 2px rgba(16,24,28,.04), 0 6px 20px rgba(16,24,28,.05);
+    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8;
+    --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#1F2A28; --accent:#0E7C6F;
   }
   :root[data-theme="dark"]{
-    --bg:#0E1315; --card:#151B1E; --ink:#D9E0E2; --ink-strong:#F1F5F6;
-    --muted:#939EA5; --faint:#6C767D; --line:#232B2F; --line-2:#1C2327;
-    --mark:#1F4D46; --mark-ink:#CFEDE6; --accent:#4FC8B8;
-    --chip:#1B2225; --up:#5FCB8E; --down:#E0975C;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C;
+    --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --accent:#4FC8B8;
   }
   *{box-sizing:border-box}
   body{
     margin:0; background:var(--bg); color:var(--ink);
     font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.6; -webkit-font-smoothing:antialiased;
+    -webkit-font-smoothing:antialiased; line-height:1.72;
   }
-  .wrap{max-width:860px; margin:0 auto; padding:56px 24px 88px}
+  .wrap{max-width:760px; margin:0 auto; padding:64px 28px 96px}
+
+  header.top{margin-bottom:8px}
   .eyebrow{
-    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--accent); font-weight:640; margin:0 0 12px;
+    font-size:11.5px; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--accent); font-weight:640; margin:0 0 10px;
   }
   h1{
-    font-size:clamp(26px,4.4vw,38px); line-height:1.12; letter-spacing:-.02em;
-    color:var(--ink-strong); margin:0 0 14px; text-wrap:balance; font-weight:720;
+    font-size:clamp(22px,3.4vw,29px); line-height:1.2; letter-spacing:-.015em;
+    color:var(--strong); font-weight:680; margin:0 0 10px; text-wrap:balance;
   }
-  .lede{font-size:16.5px; color:var(--muted); margin:0 0 8px; max-width:60ch}
-  .lede b{color:var(--ink); font-weight:640}
+  .sub{font-size:15px; color:var(--muted); margin:0; max-width:60ch}
 
-  /* summary strip */
-  .summary{
-    margin:34px 0 6px; border:1px solid var(--line); border-radius:14px;
-    overflow:hidden; background:var(--card); box-shadow:var(--shadow);
+  .extract{padding:40px 0 34px; border-top:1px solid var(--rule)}
+  .extract:first-of-type{border-top:none; padding-top:26px}
+  .head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    gap:16px; margin-bottom:16px;
   }
-  .summary table{width:100%; border-collapse:collapse; font-size:14px}
-  .summary th,.summary td{padding:11px 16px; text-align:left; border-bottom:1px solid var(--line-2)}
-  .summary thead th{
-    font-size:11px; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--faint); font-weight:620; background:var(--chip);
+  .who{font-size:15px; font-weight:670; color:var(--strong)}
+  .who .role{font-weight:450; color:var(--muted)}
+  .when{
+    font-size:13px; color:var(--muted); white-space:nowrap;
+    font-variant-numeric:tabular-nums; letter-spacing:.01em;
   }
-  .summary tr:last-child td{border-bottom:0}
-  .summary td.num{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
-  .co-cell{display:flex; align-items:center; gap:9px; font-weight:600; color:var(--ink-strong)}
-  .dot{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
-  .arrow{font-weight:700}
-  .arrow.up{color:var(--up)} .arrow.down{color:var(--down)}
+  .when .co{color:var(--strong); font-weight:600}
 
-  .section-label{
-    margin:46px 0 4px; font-size:12px; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--faint); font-weight:620;
+  p.quote{
+    font-size:16.5px; line-height:1.74; color:var(--ink); margin:0;
+    max-width:68ch;
   }
-
-  /* extract cards */
-  .card{
-    background:var(--card); border:1px solid var(--line); border-radius:16px;
-    padding:24px 26px 20px; margin-top:18px; box-shadow:var(--shadow);
-  }
-  .card-head{
-    display:flex; justify-content:space-between; align-items:baseline; gap:16px;
-    padding-bottom:14px; margin-bottom:16px; border-bottom:1px solid var(--line-2);
-  }
-  .speaker{font-weight:680; color:var(--ink-strong); font-size:16px}
-  .role{color:var(--muted); font-size:13px; font-weight:500}
-  .meta{text-align:right; white-space:nowrap; display:flex; align-items:center; gap:9px}
-  .meta .co{display:flex; align-items:center; gap:8px; font-weight:620; color:var(--ink-strong); font-size:14px}
-  .meta .when{color:var(--faint); font-size:12.5px; letter-spacing:.02em}
-
-  blockquote{
-    margin:0; font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
-    font-size:17px; line-height:1.66; color:var(--ink); letter-spacing:.002em;
-  }
-  blockquote .lead{color:var(--faint)}
   mark{
     background:var(--mark); color:var(--mark-ink);
-    padding:.06em .12em; border-radius:2px; box-decoration-break:clone;
-    -webkit-box-decoration-break:clone; font-weight:520;
+    padding:.05em 0; box-decoration-break:clone; -webkit-box-decoration-break:clone;
   }
-
-  .foot{
-    display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px;
-    margin-top:18px; padding-top:14px; border-top:1px solid var(--line-2);
+  .source{
+    text-align:center; margin-top:26px; font-size:13px; color:var(--muted);
+    font-family:Georgia,"Times New Roman",serif; letter-spacing:.01em;
   }
-  .chips{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-  .chip{
-    display:inline-flex; align-items:center; gap:6px; font-size:12.5px;
-    padding:4px 10px; border-radius:999px; background:var(--chip);
-    color:var(--muted); font-variant-numeric:tabular-nums; border:1px solid var(--line-2);
+  footer{
+    margin-top:52px; padding-top:22px; border-top:1px solid var(--rule);
+    font-size:12px; color:var(--muted); line-height:1.6;
   }
-  .chip b{color:var(--ink-strong); font-weight:640}
-  .chip.now{background:color-mix(in srgb,var(--mark) 55%,var(--card)); color:var(--mark-ink); border-color:transparent}
-  .chip.now b{color:var(--mark-ink)}
-  .to{color:var(--faint); font-weight:700; padding:0 1px}
-  .src{margin-left:auto; font-size:12px; color:var(--faint)}
-
-  .note{
-    margin-top:40px; font-size:13px; color:var(--muted); line-height:1.6;
-    border-left:2px solid var(--line); padding:2px 0 2px 16px; max-width:64ch;
-  }
-  .note b{color:var(--ink)}
-  footer{margin-top:34px; font-size:12px; color:var(--faint)}
-  @media (max-width:560px){
-    .wrap{padding:40px 16px 64px}
-    .card{padding:20px 18px 16px}
-    .card-head{flex-direction:column; gap:6px}
-    .meta{text-align:left}
-    .summary{overflow-x:auto}
+  footer b{color:var(--ink); font-weight:620}
+  @media (max-width:520px){
+    .wrap{padding:44px 18px 72px}
+    .head{flex-direction:column; gap:4px}
   }
 </style>
 
 <div class="wrap">
-  <p class="eyebrow">Hyperscaler earnings · 2026 capex guidance</p>
-  <h1>What each hyperscaler said about capex — in their own words</h1>
-  <p class="lede">The exact passage from each company's most recent earnings call where
-  management set 2026/27 capital-expenditure guidance and named the change from the
-  <b>prior estimate</b>. Transcribed verbatim from the official call transcripts; the capex
-  sentences are <mark>highlighted</mark>.</p>
-
-  <div class="summary">
-    <table>
-      <thead>
-        <tr><th>Company</th><th>Call</th><th>Previous</th><th></th><th>Current guidance</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="co-cell"><span class="dot" style="background:#FF9900"></span>Amazon</span></td>
-          <td>Q2 2026</td>
-          <td class="num">~$200B</td>
-          <td class="num"><span class="arrow up">↑</span></td>
-          <td class="num"><b>~$220B</b> cash capex ’26</td>
-        </tr>
-        <tr>
-          <td><span class="co-cell"><span class="dot" style="background:#0078D4"></span>Microsoft</span></td>
-          <td>FY26 Q4</td>
-          <td class="num">~$190B</td>
-          <td class="num"><span class="arrow down">↓</span></td>
-          <td class="num"><b>~$175B</b> CY26 *</td>
-        </tr>
-        <tr>
-          <td><span class="co-cell"><span class="dot" style="background:#0866FF"></span>Meta</span></td>
-          <td>Q2 2026</td>
-          <td class="num">$125–145B</td>
-          <td class="num"><span class="arrow up">↑</span></td>
-          <td class="num"><b>$130–145B</b> ’26</td>
-        </tr>
-        <tr>
-          <td><span class="co-cell"><span class="dot" style="background:#4285F4"></span>Alphabet</span></td>
-          <td>Q2 2026</td>
-          <td class="num">$180–190B</td>
-          <td class="num"><span class="arrow up">↑</span></td>
-          <td class="num"><b>$195–205B</b> FY26</td>
-        </tr>
-        <tr>
-          <td><span class="co-cell"><span class="dot" style="background:#C74634"></span>Oracle</span></td>
-          <td>FY26 Q4</td>
-          <td class="num">$48B net (FY26)</td>
-          <td class="num"><span class="arrow up">↑</span></td>
-          <td class="num"><b>~$70B</b> net outlay FY27</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="section-label">The extracts</p>
+  <header class="top">
+    <p class="eyebrow">Hyperscaler earnings · 2026 capex guidance</p>
+    <h1>Capex guidance, in each company’s own words</h1>
+    <p class="sub">The exact passage from each hyperscaler’s latest earnings call setting capital-expenditure guidance — verbatim from the official transcripts, capex sentences highlighted.</p>
+  </header>
 
   <!-- AMAZON -->
-  <article class="card">
-    <div class="card-head">
-      <div><span class="speaker">Andy Jassy</span> &nbsp;<span class="role">President &amp; CEO</span></div>
-      <div class="meta"><span class="co"><span class="dot" style="background:#FF9900"></span>Amazon</span><span class="when">Q2 2026 · Jul 30</span></div>
+  <section class="extract">
+    <div class="head">
+      <div class="who">Andy Jassy <span class="role">· President &amp; CEO</span></div>
+      <div class="when"><span class="co">Amazon</span> · Q2 2026 · Jul 30</div>
     </div>
-    <blockquote><span class="lead">…we've done this before in the first era of cloud computing, just over a longer time horizon, where demand built more gradually than it has in AI. But we see the margins and returns in AI tracking what we saw with core at the same point of evolution, actually a little ahead. </span><mark>We now believe we will spend approximately $220 billion in cash CapEx in 2026, the higher cost of memory pushing this number up from our prior estimate of about $200 billion. But even at that amount, we will still not have enough capacity to meet all the demand we have in 2026, and I believe this dynamic will also be true in 2027 too.</mark></blockquote>
-    <div class="foot">
-      <div class="chips">
-        <span class="chip">Prior <b>~$200B</b></span><span class="to">→</span><span class="chip now">Now <b>~$220B</b></span>
-      </div>
-      <span class="src">Source: Amazon.com Inc. Q2 2026 earnings call transcript</span>
-    </div>
-  </article>
+    <p class="quote">…we've done this before in the first era of cloud computing, just over a longer time horizon, where demand built more gradually than it has in AI. But we see the margins and returns in AI tracking what we saw with core at the same point of evolution, actually a little ahead. <mark>We now believe we will spend approximately $220 billion in cash CapEx in 2026, the higher cost of memory pushing this number up from our prior estimate of about $200 billion. But even at that amount, we will still not have enough capacity to meet all the demand we have in 2026, and I believe this dynamic will also be true in 2027 too.</mark></p>
+    <div class="source">Source: Amazon.com Inc. Q2 2026 earnings call transcript</div>
+  </section>
 
   <!-- MICROSOFT -->
-  <article class="card">
-    <div class="card-head">
-      <div><span class="speaker">Amy Hood</span> &nbsp;<span class="role">EVP &amp; CFO</span></div>
-      <div class="meta"><span class="co"><span class="dot" style="background:#0078D4"></span>Microsoft</span><span class="when">FY26 Q4 · Jul 29</span></div>
+  <section class="extract">
+    <div class="head">
+      <div class="who">Amy Hood <span class="role">· EVP &amp; CFO</span></div>
+      <div class="when"><span class="co">Microsoft</span> · FY26 Q4 · Jul 29</div>
     </div>
-    <blockquote><span class="lead">Now, before I move to outlook, effective at the start of FY27, we are extending the estimated useful lives of our datacenters and office buildings, from 15 to 25 years… The greater impact is on capital expenditures as more of our future datacenter leases will shift from finance leases to operating leases as a result of this update. Finance leases are included in capital expenditures while operating leases are not. </span><mark>Outside of this useful life impact, our calendar year 2026 CapEx investment expectations remain unchanged. However, the shift from finance to operating leases adjusts our expectation to approximately $175 billion.</mark></blockquote>
-    <div class="foot">
-      <div class="chips">
-        <span class="chip">Prior <b>~$190B</b></span><span class="to">→</span><span class="chip now">Now <b>~$175B</b></span>
-        <span class="chip">accounting change, not less buildout</span>
-      </div>
-      <span class="src">Source: Microsoft Corp. FY2026 Q4 earnings call transcript</span>
-    </div>
-  </article>
+    <p class="quote">Now, before I move to outlook, effective at the start of FY27, we are extending the estimated useful lives of our datacenters and office buildings, from 15 to 25 years… The greater impact is on capital expenditures as more of our future datacenter leases will shift from finance leases to operating leases as a result of this update. Finance leases are included in capital expenditures while operating leases are not. <mark>Outside of this useful life impact, our calendar year 2026 CapEx investment expectations remain unchanged. However, the shift from finance to operating leases adjusts our expectation to approximately $175 billion.</mark></p>
+    <div class="source">Source: Microsoft Corp. FY2026 Q4 earnings call transcript</div>
+  </section>
 
   <!-- META -->
-  <article class="card">
-    <div class="card-head">
-      <div><span class="speaker">Susan Li</span> &nbsp;<span class="role">CFO</span></div>
-      <div class="meta"><span class="co"><span class="dot" style="background:#0866FF"></span>Meta</span><span class="when">Q2 2026 · Jul 29</span></div>
+  <section class="extract">
+    <div class="head">
+      <div class="who">Susan Li <span class="role">· CFO</span></div>
+      <div class="when"><span class="co">Meta</span> · Q2 2026 · Jul 29</div>
     </div>
-    <blockquote><span class="lead">We now expect full-year 2026 total expenses to be in the range of $165 billion to $169 billion. We continue to expect to deliver operating income this year that is above 2025 operating income. </span><mark>We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $130 billion to $145 billion, narrowed from our prior outlook of $125 billion to $145 billion.</mark></blockquote>
-    <div class="foot">
-      <div class="chips">
-        <span class="chip">Prior <b>$125–145B</b></span><span class="to">→</span><span class="chip now">Now <b>$130–145B</b></span>
-        <span class="chip">low end +$5B</span>
-      </div>
-      <span class="src">Source: Meta Platforms Inc. Q2 2026 earnings call transcript</span>
-    </div>
-  </article>
+    <p class="quote">We now expect full-year 2026 total expenses to be in the range of $165 billion to $169 billion. We continue to expect to deliver operating income this year that is above 2025 operating income. <mark>We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $130 billion to $145 billion, narrowed from our prior outlook of $125 billion to $145 billion.</mark></p>
+    <div class="source">Source: Meta Platforms Inc. Q2 2026 earnings call transcript</div>
+  </section>
 
   <!-- ALPHABET -->
-  <article class="card">
-    <div class="card-head">
-      <div><span class="speaker">Anat Ashkenazi</span> &nbsp;<span class="role">CFO</span></div>
-      <div class="meta"><span class="co"><span class="dot" style="background:#4285F4"></span>Alphabet</span><span class="when">Q2 2026 · Jul 22</span></div>
+  <section class="extract">
+    <div class="head">
+      <div class="who">Anat Ashkenazi <span class="role">· CFO</span></div>
+      <div class="when"><span class="co">Alphabet</span> · Q2 2026 · Jul 22</div>
     </div>
-    <blockquote><mark>Moving to investments, we are updating our full year 2026 CapEx guidance range to $195 billion to $205 billion, up from our previous estimate of $180 billion to $190 billion. The increase in the range is primarily due to an acceleration in the delivery of capacity to meet growing demand.</mark><span class="lead"> As we previously shared, we continue to expect our CapEx to increase significantly in 2027, and we'll provide more details at a later date.</span></blockquote>
-    <div class="foot">
-      <div class="chips">
-        <span class="chip">Prior <b>$180–190B</b></span><span class="to">→</span><span class="chip now">Now <b>$195–205B</b></span>
-        <span class="chip">+$15B midpoint</span>
-      </div>
-      <span class="src">Source: Alphabet Inc. Q2 2026 earnings call transcript</span>
-    </div>
-  </article>
+    <p class="quote"><mark>Moving to investments, we are updating our full year 2026 CapEx guidance range to $195 billion to $205 billion, up from our previous estimate of $180 billion to $190 billion. The increase in the range is primarily due to an acceleration in the delivery of capacity to meet growing demand.</mark> As we previously shared, we continue to expect our CapEx to increase significantly in 2027, and we'll provide more details at a later date.</p>
+    <div class="source">Source: Alphabet Inc. Q2 2026 earnings call transcript</div>
+  </section>
 
   <!-- ORACLE -->
-  <article class="card">
-    <div class="card-head">
-      <div><span class="speaker">Hilary Maxson</span> &nbsp;<span class="role">CFO</span></div>
-      <div class="meta"><span class="co"><span class="dot" style="background:#C74634"></span>Oracle</span><span class="when">FY26 Q4 · Jun 10</span></div>
+  <section class="extract">
+    <div class="head">
+      <div class="who">Hilary Maxson <span class="role">· CFO</span></div>
+      <div class="when"><span class="co">Oracle</span> · FY26 Q4 · Jun 10</div>
     </div>
-    <blockquote><span class="lead">In order to unlock this unique growth opportunity, we started a program of capital investments. </span><mark>We'll continue those investments in our fiscal year 2027 with an expected net cash outlay for capital expenditures of around $70 billion. This includes customer prepayments and timing impacts expected at around $20 billion to $25 billion, so our reported CapEx will be higher by this amount.</mark><span class="lead"> Importantly, these investments are being driven by committed customer demand reflected in our record RPO…</span></blockquote>
-    <div class="foot">
-      <div class="chips">
-        <span class="chip">FY26 <b>$48B</b> net outlay</span><span class="to">→</span><span class="chip now">FY27 <b>~$70B</b> net outlay</span>
-        <span class="chip">gross ~$90–95B</span>
-      </div>
-      <span class="src">Source: Oracle Corp. FY2026 Q4 earnings call transcript</span>
-    </div>
-  </article>
+    <p class="quote">In order to unlock this unique growth opportunity, we started a program of capital investments. <mark>We'll continue those investments in our fiscal year 2027 with an expected net cash outlay for capital expenditures of around $70 billion. This includes customer prepayments and timing impacts expected at around $20 billion to $25 billion, so our reported CapEx will be higher by this amount.</mark> Importantly, these investments are being driven by committed customer demand reflected in our record RPO…</p>
+    <div class="source">Source: Oracle Corp. FY2026 Q4 earnings call transcript</div>
+  </section>
 
-  <p class="note"><b>* Microsoft</b> is the only one whose figure moved down — and it reflects an
-  accounting change (extending datacenter/office useful lives to 25 years from 15, which shifts
-  more leases from finance to operating and out of the capex line), not a cut to physical
-  buildout. <b>Oracle</b> reports a “net cash outlay” metric that nets out customer prepayments
-  and bring-your-own-hardware; its gross reported capex runs ~$20–25B higher (≈$90–95B in FY27).
-  All quotes transcribed verbatim from the official call transcripts; ellipses mark trimmed
-  connective text, never altered wording.</p>
-
-  <footer>Compiled Aug 3, 2026 · figures are on each company’s own fiscal calendar and are directional, not strictly comparable.</footer>
+  <footer><b>Notes.</b> Quotes transcribed verbatim from the official call transcripts; ellipses mark trimmed connective text, never altered wording. Microsoft’s lower figure reflects an accounting change (useful lives extended to 25 years, shifting leases off the capex line), not reduced buildout. Oracle’s “net cash outlay” nets out customer prepayments; its gross reported capex runs ~$20–25B higher.</footer>
 </div>
-
-<script>
-  // keep viewer's explicit theme toggle authoritative (tokens already handle both)
-  (function(){
-    try{
-      var r=document.documentElement;
-      var t=r.getAttribute('data-theme');
-      if(t){r.setAttribute('data-theme',t);}
-    }catch(e){}
-  })();
-</script>
