@@ -1,22 +1,26 @@
-<title>Hyperscaler Capex — Verbatim Earnings-Call Extracts</title>
+<title>Hyperscaler Capex — Previous vs. Latest Guidance Extracts</title>
 <style>
   :root{
-    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8;
+    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8; --faint:#B4BABF;
     --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#1F2A28; --accent:#0E7C6F;
+    --prev:#6E767D; --tag:#F2F4F5; --tag-ink:#7A828A;
   }
   @media (prefers-color-scheme:dark){
     :root{
-      --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C;
+      --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C; --faint:#5A636A;
       --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --accent:#4FC8B8;
+      --prev:#8A939A; --tag:#1B2225; --tag-ink:#8A939A;
     }
   }
   :root[data-theme="light"]{
-    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8;
+    --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8; --faint:#B4BABF;
     --rule:#ECEEF0; --mark:#CFE1DD; --mark-ink:#1F2A28; --accent:#0E7C6F;
+    --prev:#6E767D; --tag:#F2F4F5; --tag-ink:#7A828A;
   }
   :root[data-theme="dark"]{
-    --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C;
+    --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C; --faint:#5A636A;
     --rule:#20272B; --mark:#20463F; --mark-ink:#D8ECE7; --accent:#4FC8B8;
+    --prev:#8A939A; --tag:#1B2225; --tag-ink:#8A939A;
   }
   *{box-sizing:border-box}
   body{
@@ -24,9 +28,7 @@
     font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased; line-height:1.72;
   }
-  .wrap{max-width:760px; margin:0 auto; padding:64px 28px 96px}
-
-  header.top{margin-bottom:8px}
+  .wrap{max-width:770px; margin:0 auto; padding:64px 28px 96px}
   .eyebrow{
     font-size:11.5px; letter-spacing:.15em; text-transform:uppercase;
     color:var(--accent); font-weight:640; margin:0 0 10px;
@@ -35,101 +37,165 @@
     font-size:clamp(22px,3.4vw,29px); line-height:1.2; letter-spacing:-.015em;
     color:var(--strong); font-weight:680; margin:0 0 10px; text-wrap:balance;
   }
-  .sub{font-size:15px; color:var(--muted); margin:0; max-width:60ch}
+  .sub{font-size:15px; color:var(--muted); margin:0; max-width:62ch}
+  .sub b{color:var(--ink); font-weight:600}
 
-  .extract{padding:40px 0 34px; border-top:1px solid var(--rule)}
-  .extract:first-of-type{border-top:none; padding-top:26px}
-  .head{
-    display:flex; justify-content:space-between; align-items:baseline;
-    gap:16px; margin-bottom:16px;
+  .extract{padding:38px 0 32px; border-top:1px solid var(--rule)}
+  .company{
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+    font-size:17px; font-weight:700; color:var(--strong); letter-spacing:-.01em;
   }
-  .who{font-size:15px; font-weight:670; color:var(--strong)}
-  .who .role{font-weight:450; color:var(--muted)}
-  .when{
-    font-size:13px; color:var(--muted); white-space:nowrap;
-    font-variant-numeric:tabular-nums; letter-spacing:.01em;
+  .dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto}
+  .delta{
+    margin-left:auto; font-size:12.5px; font-weight:600; color:var(--muted);
+    font-variant-numeric:tabular-nums; letter-spacing:.01em; white-space:nowrap;
   }
-  .when .co{color:var(--strong); font-weight:600}
+  .delta .n{color:var(--strong)} .delta .ar{color:var(--accent); padding:0 3px; font-weight:700}
 
-  p.quote{
-    font-size:16.5px; line-height:1.74; color:var(--ink); margin:0;
-    max-width:68ch;
+  .turn{margin:0 0 22px}
+  .turn:last-of-type{margin-bottom:0}
+  .label-row{display:flex; align-items:baseline; gap:10px; margin-bottom:7px; flex-wrap:wrap}
+  .stage{
+    font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; font-weight:680;
   }
+  .stage.prev{color:var(--faint)}
+  .stage.now{color:var(--accent)}
+  .byline{font-size:13px; color:var(--muted)}
+  .byline .sp{color:var(--strong); font-weight:600}
+  .tag{
+    font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:640;
+    background:var(--tag); color:var(--tag-ink); padding:2px 7px; border-radius:4px;
+  }
+  p.quote{font-size:16px; line-height:1.72; margin:0; max-width:70ch; color:var(--ink)}
+  .turn.previous p.quote{font-size:15px; color:var(--prev)}
   mark{
-    background:var(--mark); color:var(--mark-ink);
-    padding:.05em 0; box-decoration-break:clone; -webkit-box-decoration-break:clone;
+    background:var(--mark); color:var(--mark-ink); padding:.05em 0;
+    box-decoration-break:clone; -webkit-box-decoration-break:clone;
   }
+  .turn.previous mark{opacity:.9}
   .source{
-    text-align:center; margin-top:26px; font-size:13px; color:var(--muted);
-    font-family:Georgia,"Times New Roman",serif; letter-spacing:.01em;
+    margin-top:20px; padding-top:6px; font-size:12.5px; color:var(--muted);
+    font-family:Georgia,"Times New Roman",serif;
   }
+  .source span{display:block}
+  .source .prevsrc{color:var(--faint)}
+
   footer{
-    margin-top:52px; padding-top:22px; border-top:1px solid var(--rule);
-    font-size:12px; color:var(--muted); line-height:1.6;
+    margin-top:48px; padding-top:22px; border-top:1px solid var(--rule);
+    font-size:12px; color:var(--muted); line-height:1.65;
   }
   footer b{color:var(--ink); font-weight:620}
-  @media (max-width:520px){
-    .wrap{padding:44px 18px 72px}
-    .head{flex-direction:column; gap:4px}
-  }
+  @media (max-width:520px){ .wrap{padding:44px 18px 72px} .delta{width:100%; margin:4px 0 0} }
 </style>
 
 <div class="wrap">
-  <header class="top">
-    <p class="eyebrow">Hyperscaler earnings · 2026 capex guidance</p>
-    <h1>Capex guidance, in each company’s own words</h1>
-    <p class="sub">The exact passage from each hyperscaler’s latest earnings call setting capital-expenditure guidance — verbatim from the official transcripts, capex sentences highlighted.</p>
-  </header>
+  <p class="eyebrow">Hyperscaler earnings · 2026 capex guidance</p>
+  <h1>Previous vs. latest capex guidance — in their own words</h1>
+  <p class="sub">For each hyperscaler, the exact passage where guidance was set on the
+  <b>prior</b> call and again on the <b>latest</b> call — capex sentences highlighted.
+  Latest quotes are verbatim from the official transcripts; previous quotes are transcribed
+  from published reporting of those earlier calls.</p>
 
   <!-- AMAZON -->
   <section class="extract">
-    <div class="head">
-      <div class="who">Andy Jassy <span class="role">· President &amp; CEO</span></div>
-      <div class="when"><span class="co">Amazon</span> · Q2 2026 · Jul 30</div>
+    <div class="company"><span class="dot" style="background:#FF9900"></span>Amazon
+      <span class="delta"><span class="n">~$200B</span><span class="ar">→</span><span class="n">~$220B</span> cash capex ’26</span></div>
+
+    <div class="turn previous">
+      <div class="label-row"><span class="stage prev">Previous · Q4 2025 · Feb 5</span><span class="byline"><span class="sp">Andy Jassy</span>, President &amp; CEO</span><span class="tag">reported</span></div>
+      <p class="quote">"With such strong demand for our existing offerings and seminal opportunities like AI, chips, robotics, low earth orbit satellites, <mark>we expect to invest about $200 billion in capital expenditures across Amazon in 2026</mark>, and anticipate strong long-term return on invested capital."</p>
     </div>
-    <p class="quote">…we've done this before in the first era of cloud computing, just over a longer time horizon, where demand built more gradually than it has in AI. But we see the margins and returns in AI tracking what we saw with core at the same point of evolution, actually a little ahead. <mark>We now believe we will spend approximately $220 billion in cash CapEx in 2026, the higher cost of memory pushing this number up from our prior estimate of about $200 billion. But even at that amount, we will still not have enough capacity to meet all the demand we have in 2026, and I believe this dynamic will also be true in 2027 too.</mark></p>
-    <div class="source">Source: Amazon.com Inc. Q2 2026 earnings call transcript</div>
+    <div class="turn latest">
+      <div class="label-row"><span class="stage now">Latest · Q2 2026 · Jul 30</span><span class="byline"><span class="sp">Andy Jassy</span>, President &amp; CEO</span></div>
+      <p class="quote"><mark>We now believe we will spend approximately $220 billion in cash CapEx in 2026, the higher cost of memory pushing this number up from our prior estimate of about $200 billion. But even at that amount, we will still not have enough capacity to meet all the demand we have in 2026, and I believe this dynamic will also be true in 2027 too.</mark></p>
+    </div>
+    <div class="source">
+      <span>Latest: Amazon.com Inc. Q2 2026 earnings call transcript (official).</span>
+      <span class="prevsrc">Previous: Amazon.com Inc. Q4 2025 earnings call, Feb 5, 2026 (reported).</span>
+    </div>
   </section>
 
   <!-- MICROSOFT -->
   <section class="extract">
-    <div class="head">
-      <div class="who">Amy Hood <span class="role">· EVP &amp; CFO</span></div>
-      <div class="when"><span class="co">Microsoft</span> · FY26 Q4 · Jul 29</div>
+    <div class="company"><span class="dot" style="background:#0078D4"></span>Microsoft
+      <span class="delta"><span class="n">~$190B</span><span class="ar">→</span><span class="n">~$175B</span> CY26 *</span></div>
+
+    <div class="turn previous">
+      <div class="label-row"><span class="stage prev">Previous · FY26 Q3 · Apr 29</span><span class="byline"><span class="sp">Amy Hood</span>, EVP &amp; CFO</span><span class="tag">reported</span></div>
+      <p class="quote">"For calendar year 2026, we expect to invest <mark>roughly $190 billion in capital expenditures</mark>, which includes approximately $25 billion from the impact of higher component pricing… we expect to remain constrained at least through 2026."</p>
     </div>
-    <p class="quote">Now, before I move to outlook, effective at the start of FY27, we are extending the estimated useful lives of our datacenters and office buildings, from 15 to 25 years… The greater impact is on capital expenditures as more of our future datacenter leases will shift from finance leases to operating leases as a result of this update. Finance leases are included in capital expenditures while operating leases are not. <mark>Outside of this useful life impact, our calendar year 2026 CapEx investment expectations remain unchanged. However, the shift from finance to operating leases adjusts our expectation to approximately $175 billion.</mark></p>
-    <div class="source">Source: Microsoft Corp. FY2026 Q4 earnings call transcript</div>
+    <div class="turn latest">
+      <div class="label-row"><span class="stage now">Latest · FY26 Q4 · Jul 29</span><span class="byline"><span class="sp">Amy Hood</span>, EVP &amp; CFO</span></div>
+      <p class="quote">…effective at the start of FY27, we are extending the estimated useful lives of our datacenters and office buildings, from 15 to 25 years… <mark>Outside of this useful life impact, our calendar year 2026 CapEx investment expectations remain unchanged. However, the shift from finance to operating leases adjusts our expectation to approximately $175 billion.</mark></p>
+    </div>
+    <div class="source">
+      <span>Latest: Microsoft Corp. FY2026 Q4 earnings call transcript (official).</span>
+      <span class="prevsrc">Previous: Microsoft Corp. FY2026 Q3 earnings call, Apr 29, 2026 (reported).</span>
+    </div>
   </section>
 
   <!-- META -->
   <section class="extract">
-    <div class="head">
-      <div class="who">Susan Li <span class="role">· CFO</span></div>
-      <div class="when"><span class="co">Meta</span> · Q2 2026 · Jul 29</div>
+    <div class="company"><span class="dot" style="background:#0866FF"></span>Meta
+      <span class="delta"><span class="n">$125–145B</span><span class="ar">→</span><span class="n">$130–145B</span> ’26</span></div>
+
+    <div class="turn previous">
+      <div class="label-row"><span class="stage prev">Previous · Q1 2026 · Apr 29</span><span class="byline"><span class="sp">Susan Li</span>, CFO</span><span class="tag">reported</span></div>
+      <p class="quote">"<mark>We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $125 billion to $145 billion, increased from our prior range of $120 billion to $135 billion.</mark> This reflects our expectations for higher component pricing and, to a lesser extent, additional data center costs."</p>
     </div>
-    <p class="quote">We now expect full-year 2026 total expenses to be in the range of $165 billion to $169 billion. We continue to expect to deliver operating income this year that is above 2025 operating income. <mark>We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $130 billion to $145 billion, narrowed from our prior outlook of $125 billion to $145 billion.</mark></p>
-    <div class="source">Source: Meta Platforms Inc. Q2 2026 earnings call transcript</div>
+    <div class="turn latest">
+      <div class="label-row"><span class="stage now">Latest · Q2 2026 · Jul 29</span><span class="byline"><span class="sp">Susan Li</span>, CFO</span></div>
+      <p class="quote">We continue to expect to deliver operating income this year that is above 2025 operating income. <mark>We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $130 billion to $145 billion, narrowed from our prior outlook of $125 billion to $145 billion.</mark></p>
+    </div>
+    <div class="source">
+      <span>Latest: Meta Platforms Inc. Q2 2026 earnings call transcript (official).</span>
+      <span class="prevsrc">Previous: Meta Platforms Inc. Q1 2026 earnings call, Apr 29, 2026 (reported).</span>
+    </div>
   </section>
 
   <!-- ALPHABET -->
   <section class="extract">
-    <div class="head">
-      <div class="who">Anat Ashkenazi <span class="role">· CFO</span></div>
-      <div class="when"><span class="co">Alphabet</span> · Q2 2026 · Jul 22</div>
+    <div class="company"><span class="dot" style="background:#4285F4"></span>Alphabet
+      <span class="delta"><span class="n">$180–190B</span><span class="ar">→</span><span class="n">$195–205B</span> FY26</span></div>
+
+    <div class="turn previous">
+      <div class="label-row"><span class="stage prev">Previous · Q1 2026 · Apr 29</span><span class="byline"><span class="sp">Anat Ashkenazi</span>, CFO</span><span class="tag">reported</span></div>
+      <p class="quote">"We are updating our <mark>full year 2026 CapEx guidance range to $180 billion to $190 billion, up from our previous estimate of $175 billion to $185 billion</mark>, to now include investment related to the acquisition of Intersect, which closed in March… we continue to expect our CapEx to significantly increase in 2027."</p>
     </div>
-    <p class="quote"><mark>Moving to investments, we are updating our full year 2026 CapEx guidance range to $195 billion to $205 billion, up from our previous estimate of $180 billion to $190 billion. The increase in the range is primarily due to an acceleration in the delivery of capacity to meet growing demand.</mark> As we previously shared, we continue to expect our CapEx to increase significantly in 2027, and we'll provide more details at a later date.</p>
-    <div class="source">Source: Alphabet Inc. Q2 2026 earnings call transcript</div>
+    <div class="turn latest">
+      <div class="label-row"><span class="stage now">Latest · Q2 2026 · Jul 22</span><span class="byline"><span class="sp">Anat Ashkenazi</span>, CFO</span></div>
+      <p class="quote"><mark>Moving to investments, we are updating our full year 2026 CapEx guidance range to $195 billion to $205 billion, up from our previous estimate of $180 billion to $190 billion. The increase in the range is primarily due to an acceleration in the delivery of capacity to meet growing demand.</mark></p>
+    </div>
+    <div class="source">
+      <span>Latest: Alphabet Inc. Q2 2026 earnings call transcript (official).</span>
+      <span class="prevsrc">Previous: Alphabet Inc. Q1 2026 earnings call, Apr 29, 2026 (reported).</span>
+    </div>
   </section>
 
   <!-- ORACLE -->
   <section class="extract">
-    <div class="head">
-      <div class="who">Hilary Maxson <span class="role">· CFO</span></div>
-      <div class="when"><span class="co">Oracle</span> · FY26 Q4 · Jun 10</div>
+    <div class="company"><span class="dot" style="background:#C74634"></span>Oracle
+      <span class="delta"><span class="n">~$50B</span> FY26 guide<span class="ar">→</span><span class="n">~$70B</span> net FY27</span></div>
+
+    <div class="turn previous">
+      <div class="label-row"><span class="stage prev">Previous · Q3 FY26 · Mar 10</span><span class="byline">Management guidance</span><span class="tag">reported</span></div>
+      <p class="quote">"For fiscal year 2026, we expect total revenue of $67 billion and <mark>capital expenditures of approximately $50 billion</mark>." <span style="color:var(--faint)">(FY26 reported capex ultimately came in at ~$55.7B / $48B net of prepayments.)</span></p>
     </div>
-    <p class="quote">In order to unlock this unique growth opportunity, we started a program of capital investments. <mark>We'll continue those investments in our fiscal year 2027 with an expected net cash outlay for capital expenditures of around $70 billion. This includes customer prepayments and timing impacts expected at around $20 billion to $25 billion, so our reported CapEx will be higher by this amount.</mark> Importantly, these investments are being driven by committed customer demand reflected in our record RPO…</p>
-    <div class="source">Source: Oracle Corp. FY2026 Q4 earnings call transcript</div>
+    <div class="turn latest">
+      <div class="label-row"><span class="stage now">Latest · FY26 Q4 · Jun 10</span><span class="byline"><span class="sp">Hilary Maxson</span>, CFO</span></div>
+      <p class="quote">We started a program of capital investments. <mark>We'll continue those investments in our fiscal year 2027 with an expected net cash outlay for capital expenditures of around $70 billion. This includes customer prepayments and timing impacts expected at around $20 billion to $25 billion, so our reported CapEx will be higher by this amount.</mark></p>
+    </div>
+    <div class="source">
+      <span>Latest: Oracle Corp. FY2026 Q4 earnings call transcript (official).</span>
+      <span class="prevsrc">Previous: Oracle Corp. FY2026 Q3 earnings call / guidance, Mar 10, 2026 (reported).</span>
+    </div>
   </section>
 
-  <footer><b>Notes.</b> Quotes transcribed verbatim from the official call transcripts; ellipses mark trimmed connective text, never altered wording. Microsoft’s lower figure reflects an accounting change (useful lives extended to 25 years, shifting leases off the capex line), not reduced buildout. Oracle’s “net cash outlay” nets out customer prepayments; its gross reported capex runs ~$20–25B higher.</footer>
+  <footer><b>Notes.</b> <b>Latest</b> quotes are transcribed verbatim from the official call
+  transcripts; ellipses mark trimmed connective text. <b>Previous</b> quotes are transcribed from
+  published reporting of the prior-quarter calls (I don’t hold those official transcripts) — treat
+  the wording as high-confidence but verify before formal citation. <b>Microsoft’s</b> lower latest
+  figure is an accounting change (useful lives extended to 25 years, moving leases off the capex
+  line), not reduced buildout. <b>Oracle</b> reports a “net cash outlay” metric that nets out
+  customer prepayments; gross reported capex runs ~$20–25B higher.</footer>
 </div>

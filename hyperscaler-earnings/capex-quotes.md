@@ -4,9 +4,13 @@ The specific passage from each hyperscaler's latest earnings call where manageme
 the capital-expenditure guidance (and the change from the prior estimate). Quotes are kept to
 the capex sentence(s) only.
 
-> **Sourcing note.** These quotes are now transcribed **directly from the official earnings-call
-> transcripts** (the PDFs provided), so all five are **verbatim**. The capex sentence(s) are
-> shown in **bold** within each paragraph.
+> **Sourcing note.** **Latest-call** quotes are transcribed **directly from the official
+> earnings-call transcripts** (the PDFs provided) — all verbatim. **Previous-call** quotes
+> (added below each company) are transcribed from **published reporting** of the prior-quarter
+> calls, which are not in hand — high-confidence but verify before formal citation. Capex
+> sentence(s) shown in **bold**.
+
+See also the rendered card view: [`capex-extracts.html`](./capex-extracts.html).
 
 ---
 
@@ -24,6 +28,12 @@ Guidance raised **~$200B → ~$220B** cash capex for 2026 (higher memory costs).
 
 Source: Amazon.com Inc. Q2 2026 earnings call transcript (Jul 30, 2026).
 
+**Previous call — Q4 2025 (Andy Jassy, CEO) · Feb 5, 2026** *(reported)*
+> "With such strong demand for our existing offerings and seminal opportunities like AI, chips,
+> robotics, low earth orbit satellites, **we expect to invest about $200 billion in capital
+> expenditures across Amazon in 2026**, and anticipate strong long-term return on invested
+> capital." — Andy Jassy
+
 ---
 
 ## Alphabet — Q2 2026 (Anat Ashkenazi, CFO) · Jul 22, 2026
@@ -37,6 +47,12 @@ Guidance raised **$180–190B → $195–205B** for FY2026.
 > significantly in 2027, and we'll provide more details at a later date." — Anat Ashkenazi
 
 Source: Alphabet Inc. Q2 2026 earnings call transcript (Jul 22, 2026).
+
+**Previous call — Q1 2026 (Anat Ashkenazi, CFO) · Apr 29, 2026** *(reported)*
+> "We are updating our **full year 2026 CapEx guidance range to $180 billion to $190 billion, up
+> from our previous estimate of $175 billion to $185 billion**, to now include investment related
+> to the acquisition of Intersect, which closed in March… we continue to expect our CapEx to
+> significantly increase in 2027." — Anat Ashkenazi
 
 ---
 
@@ -56,6 +72,11 @@ reduced buildout.
 
 Source: Microsoft Corp. FY2026 Q4 earnings call transcript (Jul 29, 2026).
 
+**Previous call — FY2026 Q3 (Amy Hood, CFO) · Apr 29, 2026** *(reported)*
+> "For calendar year 2026, we expect to invest **roughly $190 billion in capital expenditures**,
+> which includes approximately $25 billion from the impact of higher component pricing… we expect
+> to remain constrained at least through 2026." — Amy Hood
+
 ---
 
 ## Meta — Q2 2026 (Susan Li, CFO) · Jul 29, 2026
@@ -69,6 +90,12 @@ Low end of 2026 guidance raised **$125–145B → $130–145B**.
 > $145 billion.**" — Susan Li
 
 Source: Meta Platforms Inc. Q2 2026 earnings call transcript (Jul 29, 2026).
+
+**Previous call — Q1 2026 (Susan Li, CFO) · Apr 29, 2026** *(reported)*
+> "**We anticipate 2026 capital expenditures, including principal payments on finance leases, to
+> be in the range of $125 billion to $145 billion, increased from our prior range of $120 billion
+> to $135 billion.** This reflects our expectations for higher component pricing and, to a lesser
+> extent, additional data center costs." — Susan Li
 
 ---
 
@@ -88,6 +115,11 @@ capex ~$55.7B). FY2027 guided to **~$70B net cash outlay** (reported capex highe
 > taking into account prepayments and timing impacts of around $8 billion." — Hilary Maxson
 
 Source: Oracle Corp. FY2026 Q4 earnings call transcript (Jun 10, 2026).
+
+**Previous call — Q3 FY2026 · Mar 10, 2026** *(reported)*
+> "For fiscal year 2026, we expect total revenue of $67 billion and **capital expenditures of
+> approximately $50 billion**." — Oracle management guidance
+> *(FY26 reported capex ultimately came in at ~$55.7B; $48B net of prepayments.)*
 
 ---
 
