@@ -51,7 +51,9 @@ public-cloud segment); see the AI-capex table below.*
 For the **exact capex quote from each call**, see [capex-quotes.md](./capex-quotes.md)
 (rendered: [capex-extracts.html](./capex-extracts.html)). For the **data-center demand** read —
 backlog/RPO, demand-vs-supply, capacity delivery — see [dc-demand-quotes.md](./dc-demand-quotes.md)
-(rendered: [dc-demand-extracts.html](./dc-demand-extracts.html)).
+(rendered: [dc-demand-extracts.html](./dc-demand-extracts.html)). The **previous-quarter capex
+guidance** (where each prior number was set) is rendered in
+[previous-guidance-extracts.html](./previous-guidance-extracts.html).
 
 *Microsoft is the only one to move guidance down — and that reflects an accounting change
 (lengthening assumed asset useful life to 25 years from 15), not reduced physical buildout.
