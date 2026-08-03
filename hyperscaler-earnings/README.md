@@ -48,6 +48,9 @@ public-cloud segment); see the AI-capex table below.*
 | Oracle | ~$55.7B (FY26 total) | ~$50B FY2026 guide | **$55.7B FY26 actual; ~$70B net FY27** | ↑ above prior guide |
 | Meta | $31.1B (Q2) | $125B–$145B CY2026 | **$130B–$145B CY2026** | ↑ low end raised |
 
+For the **exact capex quote from each call**, see
+[capex-quotes.md](./capex-quotes.md).
+
 *Microsoft is the only one to move guidance down — and that reflects an accounting change
 (lengthening assumed asset useful life to 25 years from 15), not reduced physical buildout.
 Oracle now reports a "net cash outlay" metric (~$70B FY27) that nets out customer prepayments;
