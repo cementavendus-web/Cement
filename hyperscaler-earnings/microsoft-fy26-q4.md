@@ -31,8 +31,9 @@
 ## Capex
 
 - **Capital expenditures + finance leases of $41B in the quarter, up 69%.**
-- CY2026 capex forecast **revised down to ~$175B (from ~$190B)** by lengthening the assumed
-  useful life of office and data-center properties to 25 years (from 15).
+- CY2026 capex forecast **revised down to ~$175B from the prior ~$190B** — the only
+  hyperscaler to cut guidance, and driven by an accounting change (lengthening the assumed
+  useful life of office and data-center properties to 25 years from 15), not reduced buildout.
 
 ## Q&A participants
 

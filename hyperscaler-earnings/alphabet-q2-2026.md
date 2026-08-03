@@ -21,7 +21,10 @@
 
 ## Capex & outlook
 
-- **Full-year 2026 capex guidance raised to $195B–$205B.**
+- **Q2 capex: $44.9B**, roughly double the year-ago quarter.
+- **Full-year 2026 capex guidance raised to $195B–$205B**, up from the **prior $180B–$190B**
+  (April) — a ~$15B midpoint increase. Alphabet began the year guiding $175B–$185B, so this is
+  the second raise of 2026.
 
 ## Sources
 

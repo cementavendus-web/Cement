@@ -38,15 +38,20 @@ official full transcript.
 figures are directional, not strictly comparable. Meta is omitted from this cloud table (no
 public-cloud segment); see the AI-capex table below.*
 
-## AI capex comparison — latest guidance
+## AI capex comparison — previous vs. current guidance
 
-| Company | Latest-quarter capex | Full-year capex guidance |
-|---|---|---|
-| Microsoft | $41B (Q4, +69%) | ~$175B CY2026 |
-| Amazon | — | $220B CY2026 |
-| Alphabet | — | $195B–$205B FY2026 |
-| Oracle | ~$55.7B (Q4) | — |
-| Meta | $31.1B (Q2) | $130B–$145B CY2026 |
+| Company | Latest-quarter capex | Previous guidance | Current guidance | Move |
+|---|---|---|---|---|
+| Microsoft | $41B (Q4, +69%) | ~$190B CY2026 | **~$175B CY2026** | ↓ lowered (useful life extended to 25 yrs) |
+| Amazon | — | ~$200B CY2026 (Feb) | **$220B CY2026** | ↑ +$20B (higher memory costs) |
+| Alphabet | $44.9B (Q2, ~2×) | $180B–$190B FY2026 (Apr) | **$195B–$205B FY2026** | ↑ +$15B midpoint |
+| Oracle | ~$55.7B (FY26 total) | ~$50B FY2026 guide | **$55.7B FY26 actual; ~$70B net FY27** | ↑ above prior guide |
+| Meta | $31.1B (Q2) | $125B–$145B CY2026 | **$130B–$145B CY2026** | ↑ low end raised |
+
+*Microsoft is the only one to move guidance down — and that reflects an accounting change
+(lengthening assumed asset useful life to 25 years from 15), not reduced physical buildout.
+Oracle now reports a "net cash outlay" metric (~$70B FY27) that nets out customer prepayments;
+its gross FY27 capex is guided to ~$90B–$95B.*
 
 ## Common themes across the calls
 

@@ -21,7 +21,10 @@
 
 - **>1.2 GW delivered to customers in FY2026**; FY2027 Q1 delivery approaching **~1 GW** —
   nearly as much as the prior four quarters combined.
-- **Q4 capex ~$55.7B run-rate**, which pressured the stock post-market.
+- **FY2026 capex: ~$55.7B**, above the **prior ~$50B guide** (and analyst ~$50.9B); the
+  step-up pressured the stock post-market.
+- **FY2027 outlook: ~$70B net cash outlay** (a new metric that nets out customer prepayments),
+  with **gross capex ~$90B–$95B** — well above the ~$61.5B analysts expected.
 
 ## FY2027 guidance
 

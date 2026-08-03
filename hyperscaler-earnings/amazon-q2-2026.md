@@ -21,7 +21,9 @@
 
 ## Capex & outlook
 
-- **2026 capex guidance raised to $220B**, citing strong AI demand.
+- **2026 capex guidance raised to $220B**, up **$20B from the ~$200B** signaled in February;
+  Jassy attributed the increase largely to higher memory costs plus strong AI demand.
+- Even at $220B, Jassy said Amazon **still won't have enough capacity** to meet 2026 demand.
 - Expects to remain **capacity-constrained into 2027 and 2028.**
 
 ## Sources
