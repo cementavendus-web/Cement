@@ -3,20 +3,24 @@
   :root{
     --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8; --faint:#B4BABF;
     --rule:#ECEEF0; --mark:#FBD5A8; --mark-ink:#5A3612; --accent:#C2711C;
+    --mark2:#CFE1DD; --mark2-ink:#123A33; --cxrule:#D8E6E2; --cxaccent:#0E7C6F;
   }
   @media (prefers-color-scheme:dark){
     :root{
       --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C; --faint:#5A636A;
       --rule:#20272B; --mark:#5A3C18; --mark-ink:#F6D9B4; --accent:#E7A657;
+      --mark2:#20463F; --mark2-ink:#CFEDE6; --cxrule:#2A3B37; --cxaccent:#4FC8B8;
     }
   }
   :root[data-theme="light"]{
     --bg:#FFFFFF; --ink:#33383D; --strong:#1C2024; --muted:#9AA1A8; --faint:#B4BABF;
     --rule:#ECEEF0; --mark:#FBD5A8; --mark-ink:#5A3612; --accent:#C2711C;
+    --mark2:#CFE1DD; --mark2-ink:#123A33; --cxrule:#D8E6E2; --cxaccent:#0E7C6F;
   }
   :root[data-theme="dark"]{
     --bg:#0F1416; --ink:#C4CBD0; --strong:#EEF2F4; --muted:#7C858C; --faint:#5A636A;
     --rule:#20272B; --mark:#5A3C18; --mark-ink:#F6D9B4; --accent:#E7A657;
+    --mark2:#20463F; --mark2-ink:#CFEDE6; --cxrule:#2A3B37; --cxaccent:#4FC8B8;
   }
   *{box-sizing:border-box}
   body{
@@ -55,6 +59,15 @@
     background:var(--mark); color:var(--mark-ink); padding:.06em .05em;
     box-decoration-break:clone; -webkit-box-decoration-break:clone;
   }
+  mark.cx{background:var(--mark2); color:var(--mark2-ink)}
+  .capexline{
+    margin-top:14px; padding-left:14px; border-left:2px solid var(--cxrule);
+    font-size:14.5px; line-height:1.65; color:var(--ink); max-width:70ch;
+  }
+  .capexline .lbl{
+    display:inline-block; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--cxaccent); margin-right:8px; vertical-align:1px;
+  }
   .source{
     text-align:center; margin-top:24px; font-size:13px; color:var(--muted);
     font-family:Georgia,"Times New Roman",serif;
@@ -71,9 +84,10 @@
   <p class="eyebrow">Hyperscaler earnings · data-center demand signals</p>
   <h1>“Demand exceeds capacity” — the DC demand read, in their own words</h1>
   <p class="sub">The passage from each hyperscaler’s latest earnings call that captures
-  <b>data-center demand</b> — backlog, demand-vs-supply, and capacity delivery. Verbatim from the
-  official transcripts; demand signals highlighted.</p>
-  <p class="xref">Companion to the capex-guidance extracts → <a href="./capex-extracts.html">capex-extracts.html</a></p>
+  <b>data-center demand</b> — backlog, demand-vs-supply, and capacity delivery — paired with the
+  matching <b>capex</b> point. Verbatim from the official transcripts, with the speaker (CEO/CFO)
+  named on every line. <mark>Demand</mark> is highlighted amber; <mark class="cx">capex</mark> teal.</p>
+  <p class="xref">Full previous-vs-latest capex view → <a href="./capex-extracts.html">capex-extracts.html</a></p>
 
   <!-- AMAZON -->
   <section class="extract">
@@ -82,6 +96,7 @@
       <div class="when"><span class="co">Amazon</span> · Q2 2026 · Jul 30</div>
     </div>
     <p class="quote">Revenue growth of 36.7% year-over-year, accelerating for the fifth straight quarter, our fastest growth in 18 quarters… <mark>our backlog stands at $496 billion, growing triple-digits year-over-year.</mark> AWS is now a $169 billion annualized revenue run-rate business… But even at that amount, <mark>we will still not have enough capacity to meet all the demand we have in 2026</mark>, and I believe this dynamic will also be true in 2027 too. <mark>In fact, the demand we already have for 2028 is striking.</mark></p>
+    <p class="capexline"><span class="lbl">Capex</span><b>Andy Jassy, CEO:</b> “<mark class="cx">We now believe we will spend approximately $220 billion in cash CapEx in 2026, the higher cost of memory pushing this number up from our prior estimate of about $200 billion.</mark>”</p>
     <div class="source">Source: Amazon.com Inc. Q2 2026 earnings call transcript</div>
   </section>
 
@@ -92,6 +107,7 @@
       <div class="when"><span class="co">Microsoft</span> · FY26 Q4 · Jul 29</div>
     </div>
     <p class="quote">Commercial <mark>remaining performance obligation grew 84% to $678 billion.</mark> All sequential commercial RPO growth was driven by commitments from customers outside of frontier model companies… In Azure, we expect revenue growth of approximately 45% in constant currency, and we remain focused on delivering efficiencies that help us bridge the gaps we see as <mark>customer demand continues to exceed supply.</mark></p>
+    <p class="capexline"><span class="lbl">Capex</span><b>Amy Hood, CFO:</b> “…<mark class="cx">the shift from finance to operating leases adjusts our expectation to approximately $175 billion</mark>” (CY2026; ~$190B prior — an accounting change, not a cut).</p>
     <div class="source">Source: Microsoft Corp. FY2026 Q4 earnings call transcript</div>
   </section>
 
@@ -103,6 +119,7 @@
     </div>
     <p class="quote">Cloud revenue grew 82%, <mark>powered by strong demand for AI infrastructure and AI solutions. And cloud backlog grew to $514 billion.</mark> It's great to see the wide adoption of Gemini Enterprise, with nearly 90% of Fortune 100 using it.</p>
     <p class="secondary"><span class="sp">Anat Ashkenazi, CFO:</span> “…given the <mark>supply-constrained environment, we plan to expand the use of third-party capacity in Q3 as a bridging strategy while we build out more internal capacity.</mark>”</p>
+    <p class="capexline"><span class="lbl">Capex</span><b>Anat Ashkenazi, CFO:</b> “<mark class="cx">…updating our full year 2026 CapEx guidance range to $195 billion to $205 billion, up from our previous estimate of $180 billion to $190 billion.</mark>”</p>
     <div class="source">Source: Alphabet Inc. Q2 2026 earnings call transcript</div>
   </section>
 
@@ -113,6 +130,7 @@
       <div class="when"><span class="co">Meta</span> · Q2 2026 · Jul 29</div>
     </div>
     <p class="quote">When we refer to focusing on 2026 and ’27 capacity, there are really two factors. One is <mark>we are today, and expect to be in the sort of foreseeable future, demand-constrained.</mark> That really includes our core business too, where <mark>we still have numerous ROI-positive places that we would put Compute toward if we had it.</mark></p>
+    <p class="capexline"><span class="lbl">Capex</span><b>Susan Li, CFO:</b> “<mark class="cx">We anticipate 2026 capital expenditures, including principal payments on finance leases, to be in the range of $130 billion to $145 billion, narrowed from our prior outlook of $125 billion to $145 billion.</mark>”</p>
     <div class="source">Source: Meta Platforms Inc. Q2 2026 earnings call transcript</div>
   </section>
 
@@ -123,6 +141,7 @@
       <div class="when"><span class="co">Oracle</span> · FY26 Q4 · Jun 10</div>
     </div>
     <p class="quote"><mark>We signed $67 billion in AI infrastructure contracts this quarter</mark>, the majority of which was either bring your own hardware or prepaid… Q4 finalized an impressive FY ’26 where <mark>we delivered more than 1.2 gigawatts to customers.</mark> Our pace of delivery continues to accelerate, with our <mark>FY ’27 Q1 delivery approaching 1 gigawatt, nearly the same capacity as we've delivered in the previous four quarters combined.</mark></p>
+    <p class="capexline"><span class="lbl">Capex</span><b>Hilary Maxson, CFO:</b> “<mark class="cx">We'll continue those investments in our fiscal year 2027 with an expected net cash outlay for capital expenditures of around $70 billion</mark>” (reported capex ~$20–25B higher).</p>
     <div class="source">Source: Oracle Corp. FY2026 Q4 earnings call transcript</div>
   </section>
 
