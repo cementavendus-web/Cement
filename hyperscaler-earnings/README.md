@@ -19,6 +19,9 @@ official full transcript.
 | Amazon | AWS | Q2 2026 (Apr–Jun 2026) | Jul 30, 2026 | [amazon-q2-2026.md](./amazon-q2-2026.md) |
 | Alphabet | Google Cloud | Q2 2026 (Apr–Jun 2026) | Jul 22, 2026 | [alphabet-q2-2026.md](./alphabet-q2-2026.md) |
 | Oracle | OCI | FY2026 Q4 (Mar–May 2026) | Jun 10, 2026 | [oracle-fy26-q4.md](./oracle-fy26-q4.md) |
+| Meta* | Infra / AI capex | Q2 2026 (Apr–Jun 2026) | Jul 29, 2026 | [meta-q2-2026.md](./meta-q2-2026.md) |
+
+*Meta runs hyperscale infrastructure but sells no public cloud; included as an AI-capex peer.*
 
 ## Cloud segment scorecard — latest quarter
 
@@ -32,7 +35,18 @@ official full transcript.
 | Capex guidance | ~$175B CY2026 | $220B CY2026 | $195B–$205B FY2026 | $55.7B Q4 run-rate |
 
 *Note: segments are reported on different fiscal calendars and definitions, so cross-company
-figures are directional, not strictly comparable.*
+figures are directional, not strictly comparable. Meta is omitted from this cloud table (no
+public-cloud segment); see the AI-capex table below.*
+
+## AI capex comparison — latest guidance
+
+| Company | Latest-quarter capex | Full-year capex guidance |
+|---|---|---|
+| Microsoft | $41B (Q4, +69%) | ~$175B CY2026 |
+| Amazon | — | $220B CY2026 |
+| Alphabet | — | $195B–$205B FY2026 |
+| Oracle | ~$55.7B (Q4) | — |
+| Meta | $31.1B (Q2) | $130B–$145B CY2026 |
 
 ## Common themes across the calls
 
@@ -50,9 +64,9 @@ figures are directional, not strictly comparable.*
 ## Scope
 
 "Hyperscaler" here = the three public-cloud majors (Microsoft, Amazon, Alphabet) plus
-Oracle/OCI, which is now routinely grouped with them for AI infrastructure. Meta runs
-hyperscale infrastructure but sells no public cloud, so it is excluded; it can be added
-on request for an AI-capex comparison.
+Oracle/OCI, which is now routinely grouped with them for AI infrastructure. Meta is
+included as an AI-capex peer — it runs hyperscale infrastructure but sells no public cloud,
+so it appears in the AI-capex table rather than the cloud scorecard.
 
 ## Sources
 
@@ -60,3 +74,4 @@ on request for an AI-capex comparison.
 - Amazon IR — https://ir.aboutamazon.com/
 - Alphabet IR — https://abc.xyz/investor/
 - Oracle IR — https://investor.oracle.com/
+- Meta IR — https://investor.atmeta.com/
