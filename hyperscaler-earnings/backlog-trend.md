@@ -7,13 +7,15 @@ capex build-out.
 | Company | Metric | Year-ago (same Q) | Previous quarter | Latest quarter | YoY | QoQ |
 |---|---|---|---|---|---|---|
 | **Amazon** | AWS backlog (>12-mo) | Q2’25 **~$195B** | Q1’26 **$364B** | Q2’26 **$496B** | +154% | +$132B |
-| **Microsoft** | Commercial RPO | Q4 FY25 **≈$368B** * | Q3 FY26 **$627B** | Q4 FY26 **$678B** | +84% | +$51B |
-| **Alphabet** | Google Cloud backlog | Q2’25 **$106B** | Q1’26 **$462B** | Q2’26 **$514B** | +385% | +$52B |
-| **Oracle** | Total RPO | Q4 FY25 **≈$139B** * | Q3 FY26 **$553B** | Q4 FY26 **$638B** | +363% | +$85B |
+| **Microsoft** | Commercial RPO | Q4 FY25 **$368B** | Q3 FY26 **$627B** | Q4 FY26 **$678B** | +84% | +$51B |
+| **Alphabet** | Google Cloud backlog | Q2’25 **$106B** † | Q1’26 **$462B** | Q2’26 **$514B** | +385% | +$52B |
+| **Oracle** | Total RPO | Q4 FY25 **$138B** | Q3 FY26 **$553B** | Q4 FY26 **$638B** | +363% | +$85B |
 | **Meta** | — | n/a — no public cloud | — | — | — | — |
 
-\* Year-ago figures for Microsoft and Oracle are **derived** from the stated YoY growth rate
-(Microsoft $678B ÷ 1.84; Oracle $638B ÷ 4.63), not read from a filing — treat as approximate.
+The year-ago figures for **Microsoft ($368B)** and **Oracle ($138B)** are now **confirmed against
+the official source documents** (Microsoft FY25 Q4 call; Oracle FY25 Q4 press release) — see
+[YEAR-AGO-BACKLOG-SOURCES.md](./sources/YEAR-AGO-BACKLOG-SOURCES.md). † Alphabet’s $106B is the
+management-cited Google Cloud backlog; the Q2 2025 10-Q reports $108.2B total revenue backlog.
 
 ## Notes
 
