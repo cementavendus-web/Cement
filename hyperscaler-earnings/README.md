@@ -54,7 +54,9 @@ backlog/RPO, demand-vs-supply, capacity delivery — see [dc-demand-quotes.md](.
 (rendered: [dc-demand-extracts.html](./dc-demand-extracts.html)). The **previous-quarter capex
 guidance** (where each prior number was set) is rendered in
 [previous-guidance-extracts.html](./previous-guidance-extracts.html). The **backlog / RPO trend**
-(year-ago → previous quarter → current) is in [backlog-trend.md](./backlog-trend.md). A compact,
+(year-ago → previous quarter → current) is in [backlog-trend.md](./backlog-trend.md); the full
+**5-year backlog history** is in [backlog-history.md](./backlog-history.md) (chart:
+[backlog-history-chart.html](./backlog-history-chart.html)). A compact,
 company-by-company summary of all of the above is in [key-points.html](./key-points.html). The
 underlying **source documents** (the five official transcript PDFs, Oracle press releases, and a
 data-point→source index) are in [sources/](./sources/) — see [sources/SOURCES.md](./sources/SOURCES.md).
