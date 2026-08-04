@@ -23,8 +23,11 @@ backlog trend. Two are mirrored into `year-ago-backlog/` (hosts reachable); two 
 ## Link-only sources (egress policy blocked download — 403)
 
 - **Amazon Q2 2025 10-Q** (quarter ended Jun 30, 2025), "Commitments and Contingencies" note —
-  SEC EDGAR: `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-Q&dateb=&owner=include&count=40`
-  (filing: `amzn-20250630.htm`).
+  AWS backlog ~$195B (contracts >1 yr, +25% YoY). Direct filing:
+  `https://www.sec.gov/Archives/edgar/data/1018724/000101872425000086/amzn-20250630.htm`
+  (accession `0001018724-25-000086`, filed Jul 31 2025). Filings list:
+  `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-Q`
+  (search the document text for "performance obligations"). Not mirrored — sec.gov blocked (403).
 - **Alphabet Q2 2025 10-Q** (quarter ended Jun 30, 2025) —
   SEC EDGAR: `https://www.sec.gov/Archives/edgar/data/1652044/…/goog-20250630.htm`
   · PDF mirror: `https://s206.q4cdn.com/479360582/files/doc_financials/2025/q2/goog-10-q-q2-2025.pdf`
