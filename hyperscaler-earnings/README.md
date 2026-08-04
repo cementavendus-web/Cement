@@ -55,7 +55,9 @@ backlog/RPO, demand-vs-supply, capacity delivery — see [dc-demand-quotes.md](.
 guidance** (where each prior number was set) is rendered in
 [previous-guidance-extracts.html](./previous-guidance-extracts.html). The **backlog / RPO trend**
 (year-ago → previous quarter → current) is in [backlog-trend.md](./backlog-trend.md). A compact,
-company-by-company summary of all of the above is in [key-points.html](./key-points.html).
+company-by-company summary of all of the above is in [key-points.html](./key-points.html). The
+underlying **source documents** (the five official transcript PDFs, Oracle press releases, and a
+data-point→source index) are in [sources/](./sources/) — see [sources/SOURCES.md](./sources/SOURCES.md).
 
 *Microsoft is the only one to move guidance down — and that reflects an accounting change
 (lengthening assumed asset useful life to 25 years from 15), not reduced physical buildout.
