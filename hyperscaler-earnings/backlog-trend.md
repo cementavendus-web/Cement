@@ -17,6 +17,19 @@ the official source documents** (Microsoft FY25 Q4 call; Oracle FY25 Q4 press re
 [YEAR-AGO-BACKLOG-SOURCES.md](./sources/YEAR-AGO-BACKLOG-SOURCES.md). † Alphabet’s $106B is the
 management-cited Google Cloud backlog; the Q2 2025 10-Q reports $108.2B total revenue backlog.
 
+## What each backlog metric actually covers
+
+The metrics are **not strictly like-for-like** — read each on its own definition:
+
+- **Amazon ($496B / $195B)** — company-wide **remaining performance obligations** for contracts
+  with original terms > 1 year, which Amazon's 10-Q describes as *"primarily related to AWS."*
+  Overwhelmingly AWS, but not defined as AWS-exclusive; can include other multi-year commitments.
+  Jassy cited it in the AWS section, hence it's reported as the "AWS backlog."
+- **Microsoft ($678B)** — **commercial** RPO (all commercial contracts, not Azure-only).
+- **Alphabet ($514B)** — **Google Cloud** backlog specifically (segment-level).
+- **Oracle ($638B)** — **total-company** RPO (heavily OCI/cloud-driven).
+- **Meta** — no backlog/RPO disclosed.
+
 ## Notes
 
 - **Amazon** — AWS backlog jumped **$132B in one quarter** (Q1→Q2 2026), the largest sequential
