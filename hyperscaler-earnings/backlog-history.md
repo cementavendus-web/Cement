@@ -1,97 +1,100 @@
-# Backlog / RPO — 5-year history
+# Backlog / RPO — 5-year history (calendar-normalized)
 
-Contracted backlog (remaining performance obligations) for each hyperscaler over the last ~5
-years, at **fiscal year-end** (each company on its own calendar), plus the latest quarter. Meta
-discloses no cloud backlog. Figures are the *annual* year-end snapshot — the cleanest comparison
-point — so they differ from mid-year quarterly numbers used elsewhere.
+Contracted backlog (remaining performance obligations) normalized to a **calendar** basis:
+**as of December 31 for 2021–2025**, and **as of June 2026** for the latest point. Amazon,
+Alphabet and Meta already close on Dec 31. Microsoft (FY ends Jun 30) is shown at its **Dec 31
+fiscal-Q2** reading; Oracle (FY ends May 31) has no Dec close, so it is shown at its **Nov 30
+fiscal-Q2** reading (nearest to year-end), and its "Jun 2026" point is **May 31 2026** (nearest to
+June). Meta discloses no cloud backlog.
 
-> **Metrics are not like-for-like:** Amazon = company RPO *"primarily related to AWS"*;
-> Microsoft = **all-commercial** RPO (not Azure-only); Alphabet = total RPO / Google Cloud backlog
-> (nearly the same figure); Oracle = **total-company** RPO (cloud-dominated). See per-company notes.
+> Because Microsoft and Oracle are shown at their **calendar** points here, their numbers differ
+> from the *fiscal-year-end* view — materially for 2025, when huge H2-2025 AI contracts (OpenAI /
+> Stargate) landed between the fiscal close and Dec 31. E.g. Oracle: May-2025 $138B → Nov-2025
+> $523B; Microsoft: Jun-2025 $368B → Dec-2025 $625B.
 
-## Amazon — AWS backlog (RPO, contracts >1 yr, "primarily AWS") · year-end Dec 31
+## Combined view — as of Dec 31 (2021–2025), Jun 2026 ($B)
 
-| Year-end | Backlog ($B) | YoY | Source | Confidence |
+| As of | Amazon | Microsoft | Alphabet | Oracle |
 |---|---|---|---|---|
-| Dec 2021 | $80.4B | — | Amazon FY2021 10-K | high |
-| Dec 2022 | $110.4B | +37% | Amazon FY2022 10-K | high |
-| Dec 2023 | $155.7B | +41% | Amazon FY2023 10-K | high |
-| Dec 2024 | ~$172B *(est.)* | ~+11% | bounded by $164B (Sep'24) & $189B (Mar'25) 10-Qs | low/med |
-| Dec 2025 | ~$244B | ~+41% | reporting (AInvest/Investing.com) | high |
-| **Jun 2026 (Q2)** | **$496B** | +154% vs Q2'25 | Q2 2026 call (Jassy); 10-Q | high |
+| **Dec 2021** | 80 | 147 | 51 | 37 † |
+| **Dec 2022** | 110 | 189 | 64 | 61 † |
+| **Dec 2023** | 156 | 222 | 74 | 65 † |
+| **Dec 2024** | ~172 ‡ | 298 | 93 | 97 † |
+| **Dec 2025** | ~244 | 625 | 243 | 523 † |
+| **Jun 2026** | 496 | 678 | 514 | 638 ⁑ |
 
-*Dec 2024 exact figure not snippet-verifiable (SEC blocked here); firmly between $164B and $189B.*
+† Oracle has no Dec 31 close — value is its **Nov 30** fiscal-Q2 RPO. ⁑ Oracle "Jun 2026" is
+**May 31 2026** (fiscal Q4). ‡ Amazon Dec-2024 is interpolated (see below). Metric definitions
+differ (Amazon/Oracle company-wide RPO, Microsoft all-commercial, Alphabet cloud/total).
 
-## Microsoft — Commercial RPO (all commercial, not Azure-only) · fiscal year-end Jun 30
+---
 
-| Year-end | Commercial RPO ($B) | YoY | Source | Confidence |
+## Amazon — AWS backlog (RPO, contracts >1 yr, "primarily AWS") · Dec 31
+
+| As of | Backlog ($B) | YoY | Source document | Confidence |
 |---|---|---|---|---|
-| FY2021 (Jun 2021) | $141B | ~+31% | FY21 Q4 8-K | high |
-| FY2022 (Jun 2022) | $189B | +34% | FY2022 10-K | high |
-| FY2023 (Jun 2023) | $224B | +19% | FY2023 10-K | high |
-| FY2024 (Jun 2024) | $269B | +20% | FY2024 filings | high |
-| FY2025 (Jun 2025) | $368B | +37% | Amy Hood FY25 Q4 remarks | high |
-| **FY2026 (Jun 2026)** | **$678B** | +84% | FY26 Q4 call/press | high |
+| Dec 2021 | $80.4B | — | [Amazon FY2021 10-K](https://www.sec.gov/Archives/edgar/data/1018724/000101872422000005/amzn-20211231.htm) | high |
+| Dec 2022 | $110.4B | +37% | [Amazon FY2022 10-K](https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm) | high |
+| Dec 2023 | $155.7B | +41% | [Amazon FY2023 10-K](https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm) | high |
+| Dec 2024 | ~$172B ‡ | ~+11% | interpolated: [$164B Sep'24 10-Q](https://www.sec.gov/Archives/edgar/data/1018724/000101872424000161/amzn-20240930.htm) → [$189B Mar'25 10-Q](https://www.sec.gov/Archives/edgar/data/1018724/000101872425000036/amzn-20250331.htm) | low/med |
+| Dec 2025 | ~$244B | ~+41% | reporting ([Investing.com](https://www.investing.com/news/stock-market-news/amazon-aws-ai-outlook-244b-backlog-and-margin-expansion-ahead-of-earnings-93CH-4818194)) | high |
+| **Jun 2026** | **$496B** | +154% vs Jun'25 | [Amazon Q2 2026 10-Q](https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm); Q2'26 call (Jassy) | high |
 
-## Alphabet — total RPO / Google Cloud backlog ("primarily Google Cloud") · year-end Dec 31
+## Microsoft — Commercial RPO (all commercial, not Azure-only) · Dec 31
 
-| Year-end | Metric | Figure ($B) | YoY | Source | Confidence |
+| As of | MSFT fiscal Q | Commercial RPO ($B) | YoY | Source document | Confidence |
 |---|---|---|---|---|---|
-| Dec 2021 | total RPO | $51.0B | — | FY2021 10-K | high |
-| Dec 2022 | total RPO | $64.3B | +26% | FY2022 10-K | high |
-| Dec 2023 | total RPO | $74.1B | +15% | FY2023 10-K | high |
-| Dec 2024 | total RPO | $93.2B | +26% | FY2024 10-K | high |
-| Dec 2025 | total RPO | $242.8B | +160% | FY2025 10-K | med-high |
-| Dec 2025 | Google Cloud backlog | ~$240B | >+100% | Q4 2025 call | high |
-| **Jun 2026 (Q2)** | total RPO / Cloud | $519.5B / **~$514B** | +385% | Q2 2026 10-Q / call | high |
+| Dec 2021 | FY22 Q2 | ~$147B | ~+32% | [FY22 Q2 10-Q](https://www.sec.gov/Archives/edgar/data/789019/000156459022002324/msft-10q_20211231.htm) (derived/cross-checked) | med |
+| Dec 2022 | FY23 Q2 | $189B | +29% | [FY23 Q2 press release (8-K)](https://www.sec.gov/Archives/edgar/data/789019/000095017023034400/msft-ex99_1.htm) | high |
+| Dec 2023 | FY24 Q2 | $222B | +17% | [FY24 Q2 10-Q](https://www.sec.gov/Archives/edgar/data/789019/000095017024008814/msft-20231231.htm) | high |
+| Dec 2024 | FY25 Q2 | $298B | +34% | [FY25 Q2 10-Q](https://www.sec.gov/Archives/edgar/data/789019/000095017025010491/msft-20241231.htm) | high |
+| Dec 2025 | FY26 Q2 | $625B | +110% | [FY26 Q2 news release](https://news.microsoft.com/source/2026/01/28/microsoft-cloud-and-ai-strength-drives-second-quarter-results-3/) · [10-Q](https://www.sec.gov/Archives/edgar/data/789019/000119312526027207/msft-20251231.htm) | high |
+| **Jun 2026** | FY26 Q4 | **$678B** | +84% | Microsoft FY26 Q4 call ([sources/transcripts/](./sources/transcripts/)) | high |
 
-*Total RPO and Google Cloud backlog track closely (Alphabet's RPO is "primarily Google Cloud"). A
-separately quantified cloud-backlog callout became routine only from 2025. Dec 2025 $242.8B rests
-on a single 10-K snippet — verify against the filing.*
+*Dec-2025 $625B: Microsoft disclosed ~45% of commercial RPO is tied to the OpenAI contract;
+ex-OpenAI the remainder grew ~28%. The +110% jump is largely that commitment, not organic
+bookings.*
 
-## Oracle — total RPO (cloud/OCI-dominated) · fiscal year-end May 31
+## Alphabet — total RPO / Google Cloud backlog ("primarily Google Cloud") · Dec 31
 
-| Year-end | Total RPO ($B) | YoY | Source | Confidence |
-|---|---|---|---|---|
-| FY2021 (May 2021) | $41.3B | ~+12% | FY2021 10-K | high |
-| FY2022 (May 2022) | $46.6B | +13% | FY2022 10-K | high |
-| FY2023 (May 2023) | $67.9B | +46% | FY2023 10-K | high |
-| FY2024 (May 2024) | $98B | +44% | Q4 FY24 press release | high |
-| FY2025 (May 2025) | $138B | +41% | Q4 FY25 press release | high |
-| **FY2026 (May 2026)** | **$638B** | +363% | Q4 FY26 press release | high |
+| As of | Metric | Figure ($B) | YoY | Source document | Confidence |
+|---|---|---|---|---|---|
+| Dec 2021 | total RPO | $51.0B | — | [FY2021 10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204422000019/) | high |
+| Dec 2022 | total RPO | $64.3B | +26% | [FY2022 10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204423000016/goog-20221231.htm) | high |
+| Dec 2023 | total RPO | $74.1B | +15% | [FY2023 10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204424000022/goog-20231231.htm) | high |
+| Dec 2024 | total RPO | $93.2B | +26% | [FY2024 10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204425000014/goog-20241231.htm) | high |
+| Dec 2025 | total RPO / Cloud | $242.8B / ~$240B | +160% | [FY2025 10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm); Q4'25 call | med-high |
+| **Jun 2026** | Cloud backlog | **~$514B** | +385% | [Q2 2026 10-Q](https://www.sec.gov/Archives/edgar/data/0001652044/000165204426000071/goog-20260630.htm); Q2'26 call (Pichai) | high |
 
-## Combined view (year-end snapshots, $B)
+## Oracle — total RPO (cloud/OCI-dominated) · Nov 30 (fiscal Q2, nearest to Dec)
 
-| ~Year | Amazon (AWS RPO) | Microsoft (comm. RPO) | Alphabet (total RPO) | Oracle (total RPO) |
-|---|---|---|---|---|
-| 2021 | 80 | 141 | 51 | 41 |
-| 2022 | 110 | 189 | 64 | 47 |
-| 2023 | 156 | 224 | 74 | 68 |
-| 2024 | ~172 | 269 | 93 | 98 |
-| 2025 | ~244 | 368 | 243 | 138 |
-| 2026 (latest Q) | 496 | 678 | 514 | 638 |
+| As of | Oracle fiscal Q | Total RPO ($B) | YoY | Source document | Confidence |
+|---|---|---|---|---|---|
+| Nov 2021 | FY22 Q2 | $37.2B | +8% | [FY22 Q2 10-Q](https://www.sec.gov/Archives/edgar/data/1341439/000156459021060022/orcl-10q_20211130.htm) | high |
+| Nov 2022 | FY23 Q2 | $61.2B | +65% | [FY23 Q2 10-Q](https://www.sec.gov/Archives/edgar/data/1341439/000156459022039278/orcl-10q_20221130.htm) (Cerner) | high |
+| Nov 2023 | FY24 Q2 | ~$65B | +6% | [FY24 Q2 press release](https://www.oracle.com/news/announcement/q2fy24-earnings-release-2023-12-11/) | high |
+| Nov 2024 | FY25 Q2 | $97B | +49% | [FY25 Q2 press release](https://www.oracle.com/news/announcement/q2fy25-earnings-release-2024-12-09/) | high |
+| Nov 2025 | FY26 Q2 | $523B | +438% | [FY26 Q2 press release](https://www.oracle.com/news/announcement/q2fy26-earnings-release-2025-12-10/) | high |
+| **May 2026** ⁑ | FY26 Q4 | **$638B** | +363% | [FY26 Q4 press release](https://www.oracle.com/news/announcement/q4fy26-earnings-release-2026-06-10/) ([mirrored](./sources/press-releases/)) | high |
 
-*Year labels align each company's nearest fiscal year-end (Amazon/Alphabet Dec, Microsoft Jun,
-Oracle May); the 2026 row is the latest reported quarter. Meta: no backlog disclosed.*
+*Nov-2022 +65% jump = the Cerner acquisition (Jun 2022). Nov-2025 $523B and the May-2026 $638B
+reflect the OCI/AI-compute contract wave.*
+
+---
 
 ## What the 5 years show
 
-- **Steady compounding, then an AI step-change.** Through ~2024 all four grew backlog at a
-  measured ~15–45%/yr. In the last 12–18 months each inflected sharply on multi-year AI-compute
-  contracts: Oracle ~4.6× in one year ($138B → $638B), Alphabet ~2.6× ($93B → $243B → $514B),
-  Amazon ~2× ($244B → $496B, incl. a +$132B single quarter), Microsoft +84% ($368B → $678B).
-- **The inflection is a booking-timing event** — backlog lands well ahead of the revenue and
-  capex needed to fulfil it, which is exactly why 2026 capex guidance jumped in lockstep (see
-  `capex-quotes.md`). RPO is a demand signal, not booked revenue, and a few mega-deals can move it.
-- **Caveats:** SEC/IR PDF hosts are blocked in this environment, so pre-2024 figures rest on
-  filing-snippet + reputable-secondary sourcing. Amazon Dec-2024 (~$172B) is an interpolation
-  between verified quarters; Alphabet Dec-2025 ($242.8B) is single-source. All 2025–2026 headline
-  figures are company-stated.
-
-## Sources
-Per-year source links are in the tables above (company 10-K/10-Q filings and quarterly press
-releases). Latest-quarter figures are cross-checked against the official transcripts in
-[sources/transcripts/](./sources/transcripts/) and Oracle press releases in
-[sources/press-releases/](./sources/press-releases/). See also
-[backlog-trend.md](./backlog-trend.md) (year-ago / prev-quarter / current detail) and
-[sources/YEAR-AGO-BACKLOG-SOURCES.md](./sources/YEAR-AGO-BACKLOG-SOURCES.md).
+- **Steady compounding, then an AI step-change.** Through ~2024 all four grew backlog ~15–45%/yr.
+  In late 2025–2026 each inflected sharply on multi-year AI-compute contracts: Oracle ~14× over
+  two calendar years ($37B Nov'21 → $523B Nov'25 → $638B), Microsoft ~$298B → $625B → $678B,
+  Alphabet ~$93B → $243B → $514B, Amazon ~$172B → $244B → $496B (+$132B in one 2026 quarter).
+- **Normalization matters for the AI names.** On a *fiscal-year-end* basis Oracle 2025 reads $138B
+  and Microsoft 2025 reads $368B; on this *calendar* basis they read $523B and $625B — because the
+  biggest AI contracts landed in H2 calendar-2025, after those fiscal closes.
+- **Backlog leads revenue and capex** — a demand signal, not booked revenue; a few mega-deals move
+  it (Microsoft ~45% of Dec-2025 RPO is OpenAI; Oracle's surge is OCI prepaid/BYO-hardware deals).
+- **Caveats:** SEC/IR PDF hosts are blocked in this environment, so figures rest on filing-snippet
+  + reputable-secondary sourcing. Amazon Dec-2024 (~$172B) is interpolated between verified
+  quarters; Alphabet Dec-2025 ($242.8B) and Microsoft Dec-2021 (~$147B) are single-source/derived.
+  All 2025–2026 headline figures are company-stated. Links above point to the primary documents
+  (open in a browser — I can't mirror SEC filings here).

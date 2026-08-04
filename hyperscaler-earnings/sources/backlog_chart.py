@@ -2,9 +2,9 @@
 years=[2021,2022,2023,2024,2025,2026]
 series=[
  ("Amazon","#FF9900",[80,110,156,172,244,496]),
- ("Microsoft","#0078D4",[141,189,224,269,368,678]),
+ ("Microsoft","#0078D4",[147,189,222,298,625,678]),
  ("Alphabet","#4285F4",[51,64,74,93,243,514]),
- ("Oracle","#C74634",[41,47,68,98,138,638]),
+ ("Oracle","#C74634",[37,61,65,97,523,638]),
 ]
 W,H=780,440
 ml,mr,mt,mb=54,120,28,44
@@ -19,7 +19,7 @@ for gv in range(0,701,100):
     grid+=f'<text x="{ml-8}" y="{yy+3.5:.1f}" class="ytick">${gv}</text>'
 xticks=""
 for i,yr in enumerate(years):
-    lbl=str(yr) if yr!=2026 else "2026*"
+    lbl=str(yr) if yr!=2026 else "Jun\u201926"
     xticks+=f'<text x="{x(i):.1f}" y="{H-mb+20}" class="xtick">{lbl}</text>'
 paths=""
 for name,col,vals in series:
@@ -54,9 +54,9 @@ html=f'''<title>Hyperscaler Backlog — 5-Year History</title>
 <div class="wrap">
  <p class="eyebrow">Hyperscaler earnings · contracted backlog</p>
  <h1>Backlog / RPO, 5-year history — the AI inflection</h1>
- <p class="sub">Contracted backlog (remaining performance obligations) at each company&#8217;s fiscal year-end, $ billions. Metrics differ (Amazon &amp; Oracle company-wide RPO, Microsoft all-commercial, Alphabet cloud/total) — read as trajectories, not a strict apples-to-apples level.</p>
+ <p class="sub">Contracted backlog (remaining performance obligations), $ billions, normalized to <b>Dec year-end</b> (2021&#8211;2025) and <b>Jun 2026</b>. Metrics differ (Amazon &amp; Oracle company-wide RPO, Microsoft all-commercial, Alphabet cloud/total) — read as trajectories, not a strict apples-to-apples level.</p>
  <div class="card">{svg}</div>
- <p class="note"><b>2026*</b> = latest reported quarter (Amazon/Alphabet Jun-2026; Microsoft Jun-2026; Oracle May-2026), not a full year-end. <b>Meta</b> is omitted — it discloses no cloud backlog. After years of ~15&#8211;45%/yr compounding, all four inflect sharply in 2025&#8211;2026 on multi-year AI-compute contracts (Oracle ~4.6&#215; in one year; Amazon +$132B in a single quarter). Backlog leads revenue and capex — a demand signal, not booked revenue.</p>
+ <p class="note"><b>Calendar-normalized:</b> Dec 31 for 2021&#8211;2025, Jun 2026 for the last point. Microsoft shown at its Dec-31 (fiscal Q2) reading; Oracle has no Dec/Jun close, so it&#8217;s Nov-30 for year-ends and May-31 for 2026. <b>Meta</b> is omitted — it discloses no cloud backlog. After years of ~15&#8211;45%/yr compounding, all four inflect sharply in 2025&#8211;2026 on multi-year AI-compute contracts (Oracle ~4.6&#215; in one year; Amazon +$132B in a single quarter). Backlog leads revenue and capex — a demand signal, not booked revenue.</p>
 </div>'''
 open("/home/user/Cement/hyperscaler-earnings/backlog-history-chart.html","w").write(html)
 print("wrote chart", len(html), "bytes")
