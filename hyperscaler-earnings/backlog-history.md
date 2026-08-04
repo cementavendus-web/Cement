@@ -97,4 +97,6 @@ reflect the OCI/AI-compute contract wave.*
   + reputable-secondary sourcing. Amazon Dec-2024 (~$172B) is interpolated between verified
   quarters; Alphabet Dec-2025 ($242.8B) and Microsoft Dec-2021 (~$147B) are single-source/derived.
   All 2025–2026 headline figures are company-stated. Links above point to the primary documents
-  (open in a browser — I can't mirror SEC filings here).
+  (open in a browser — I can't mirror SEC filings here). **Every figure's source document is
+  itemized in [sources/BACKLOG-HISTORY-SOURCES.md](./sources/BACKLOG-HISTORY-SOURCES.md)** — with
+  the Microsoft and Oracle documents mirrored into the repo and the rest linked.
