@@ -95,6 +95,25 @@
 
 ---
 
+## Capacity, capex & guidance reference (from Q1FY27 calls)
+
+| Company | Current capacity | Target / roadmap | FY27 capex | Key guidance |
+|---|---|---|---|---|
+| UltraTech | 205.5 MTPA | continuing expansion roadmap | — | +8.7 MTPA added in Q1; Q2 "optically softer" on monsoon + West Asia cost |
+| Ambuja | 109 MTPA | 119 MTPA by end-FY27 | Rs 6,500 cr (~25% spent Q1) | FY27 volume target +8%; cost run-rate ~Rs 4,250/t |
+| Shree | 62.8 MTPA | ~80 MTPA by FY29 (NE plant FY28) | Rs 1,500 cr (Rs 456 cr Q1) | Fuel cost "almost peaked" in Q1 |
+| Ramco | ~30 MTPA | ~31 MTPA in FY27 (debottleneck/brownfield) | ~Rs 800 cr (Rs 176 cr Q1) | Realization −5% YoY; TN limestone tax drag |
+| Dalmia Bharat | 54.7 MTPA | ~67 MTPA by Q3FY28 | — | Industry demand 7–8%; premium mix 25% of trade |
+| JK Cement | 32.3 MTPA | 40 MTPA by FY28, 50 by FY30 | Rs 5,000–6,000 cr over 2 yrs | Grey volume target 22.5–23 mn t FY27 |
+| Birla Corp | 21.4 MTPA | 27.6 MTPA by FY29 | Rs 900 cr | +Rs 70–80/t cost in Q2; net debt →~Rs 2,000 cr FY27 |
+| JK Lakshmi | ~18 MTPA | ~30 MTPA by FY30 (Durg project) | — | Cost pressures framed "temporary"; SBS/premium mix shift |
+| Sagar | 11.0 MTPA | +0.25 MTPA Gudipadu by FY28, then minimal | Rs 326 cr (Rs 94 cr Q1) | **Cut FY27 EBITDA/t guide to Rs 500–550** |
+| Heidelberg | 6.26 MTPA | — | — | No earnings call |
+| Nuvoco | ~27 MTPA | ~35 MTPA by FY28 | ~Rs 900 cr (Rs 370 cr Q1) | Demand 7–8%; +Rs 100–120/t cost Q2; pricing stable |
+| Prism Johnson | ~5.6 MTPA (cement) | — | — | Rs 500 cr equity raise approved |
+
+---
+
 ## [NEEDS YOUR INPUT] — items I deliberately did not fill
 
 1. **Your internal EBITDA estimates & the exact % FY27 downgrade/upgrade** (incl. the JKCE/UCEM "marginal upgrade post Q4 cut" and the "5–10% → <5%" sector call).
