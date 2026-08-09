@@ -114,10 +114,42 @@
 
 ---
 
+## Valuation reference (current market, as of early–mid Aug 2026)
+
+> **Read this before using the numbers.** The multiples you quote in the note (Dalmia 10x, JKLC 6x, BCORP 6x, Ramco 11x) are **forward / FY27E** EV/EBITDA on your estimates. The market figures below are mostly **trailing twelve-month (TTM)** EV/EBITDA — computed on *depressed post-cost-hit* EBITDA — so they screen optically higher. **That gap is the mean-reversion thesis, quantified:** on normalised/forward EBITDA the same names compress back toward your 6–11x. Do not overwrite your forward multiples with the TTM column — they are different bases. All figures are market data that moves daily and were extracted via search (proxy blocked live terminals); **verify on a live screen before quoting.**
+
+**Priority four (your desk names):**
+
+| Company | Price (Rs) | Mkt cap (Rs cr) | EV/EBITDA **TTM** | EV/EBITDA **fwd** | Your note (fwd) | P/E TTM |
+|---|---|---|---|---|---|---|
+| Dalmia Bharat | ~1,845 | ~34,000 | **13.6x** | n/f | 10x | n.m. (depressed EPS) |
+| Ramco Cements | ~922 | ~21,790 | **19.2x** | n/f | 11x | ~32x |
+| Birla Corp | ~876 | ~6,744 | **~7.4x** | **6.5x FY27E** (Axis) | 6x | ~13.5x |
+| JK Lakshmi | ~582 | ~7,095 | **~8.0x** (Apr–May print) | ~9.9x FY28E on TP¹ | 6x | ~15.5x |
+
+**Rest of the group:**
+
+| Company | Price (Rs) | Mkt cap (Rs cr) | EV/EBITDA **TTM** | EV/EBITDA **fwd** | P/E TTM |
+|---|---|---|---|---|---|
+| UltraTech | ~12,105 | ~3,56,000 | 21.1x | ~19x FY27E / 15x FY28E | ~41x |
+| Ambuja | ~438 | ~1,08,462 | 9.8x | n/f | ~25–31x |
+| Shree | ~24,945 (Jun) | ~89,877 | ~22–24x (dated) | n/f | ~51x |
+| JK Cement | ~5,391 | ~41,639 | 19.5x | n/f | ~44x |
+| Sagar | ~174 | ~2,281 | 13.6x | n/f | n.m. (loss) |
+| Heidelberg | ~158 | ~3,586 | ~11–13.5x | ~10.5x FY27E (Oct'25) | ~25x |
+| Nuvoco | ~346 | ~10,554 (May) | 8.9x | n/f | ~33x |
+| Prism Johnson | ~133 (May) | ~6,737 | 9.8x | n/f | ~34x |
+
+¹ JKLC's 9.9x "FY28E" in one broker note is a forward multiple on the *target price*, not spot. **Data-date flags:** Birla price Jul 28; JKLC EV/EBITDA Apr–May; Shree Jun 22; Nuvoco/Prism market caps dated to May; the rest late-Jul/early-Aug. TTM P/E is "not meaningful" for Dalmia and Sagar (depressed / negative TTM earnings) — EV/EBITDA is the cleaner metric there.
+
+**Desk-name takeaway:** Birla (~7.4x TTM, 6.5x fwd) and JK Lakshmi (~8x) sit at the cheap end; Ramco (~19x TTM) screens expensive on trailing EBITDA precisely because its Q1 EBITDA collapsed (−31% EBITDA/t) — the clearest illustration of why the mean-reversion / normalised-EBITDA lens matters. Birla's ~6.5x FY27E (Axis) independently corroborates your 6x.
+
+---
+
 ## [NEEDS YOUR INPUT] — items I deliberately did not fill
 
 1. **Your internal EBITDA estimates & the exact % FY27 downgrade/upgrade** (incl. the JKCE/UCEM "marginal upgrade post Q4 cut" and the "5–10% → <5%" sector call).
-2. **Current & target EV/EBITDA multiples** — Dalmia (10x), JKLC (6x), Birla Corp (6x), Ramco (11x) and any refresh post-results. These are your desk's numbers; I couldn't source clean market multiples.
+2. **Target / fair EV/EBITDA multiples & your forward estimates** — I've now added a current-market valuation table above (TTM plus the forward prints I could source). Still yours to set: the *forward FY27E multiples on your own EBITDA* (your 10x/6x/6x/11x basis) and the target/fair multiples you're underwriting.
 3. **Ratings / target prices / any change to the top-picks list.**
 4. **Whether to fold the Ambuja "share-gain deferred" and Ramco "no reversion yet" nuances into the published thesis, or hold the original framing.**
 
