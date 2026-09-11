@@ -1,0 +1,4 @@
+rank,company,bse_code,holder,holder_type,stake_cr,days_to_trigger,trigger_type,score,reason_1,reason_2,reason_3
+1,Zenith Aerospace Systems Limited,543999,WARBURG PINCUS,Marquee,196.5,29,Anchor lock-in (30d tranche),73.0,nearest trigger in 29d,marquee holder,stake ~Rs 196 Cr
+2,Solaris Digital Payments Limited,540719,BLACKSTONE,Marquee,"5,418.9",,,40.0,marquee holder,"stake ~Rs 5,419 Cr",
+3,Vantage Infratech Limited,500325,CHRYSCAPITAL,Marquee,20.8,,,18.0,marquee holder,stake ~Rs 21 Cr,

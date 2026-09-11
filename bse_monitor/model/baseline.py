@@ -9,7 +9,7 @@ then marquee holder, then size of position.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 # Deadline proximity dominates: a lock-in expiring in 9 days is a far stronger
 # supply signal than a large but unconstrained holding.

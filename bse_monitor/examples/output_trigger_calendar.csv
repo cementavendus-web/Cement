@@ -1,0 +1,10 @@
+trigger_date,days_to_trigger,company,bse_code,trigger_type,subject,subject_type,basis,anchor_date,stake_pct,confidence,status
+2026-09-13,2,Trident Logistics Corporation Limited,532978,Trading window reopens,—,COMPANY,RESULTS_DECLARED,2026-09-11,,0.5,PENDING
+2026-10-10,29,Zenith Aerospace Systems Limited,543999,Anchor lock-in (30d tranche),Warburg Pincus,ANCHOR_INVESTOR,ALLOTMENT,2026-09-10,,0.45,PENDING
+2026-12-09,89,Zenith Aerospace Systems Limited,543999,Anchor lock-in (90d balance),Warburg Pincus,ANCHOR_INVESTOR,ALLOTMENT,2026-09-10,,0.45,PENDING
+2027-03-10,180,Zenith Aerospace Systems Limited,543999,Pre-IPO shareholder lock-in,—,PREIPO_SHAREHOLDER,ALLOTMENT,2026-09-10,,0.45,PENDING
+2027-03-10,180,Zenith Aerospace Systems Limited,543999,Promoter excess-holding lock-in,—,PROMOTER,ALLOTMENT,2026-09-10,,0.45,PENDING
+2027-09-08,362,Vantage Infratech Limited,500325,QIP resolution expiry,—,COMPANY,RESOLUTION,2026-09-08,,0.67,PENDING
+2027-09-10,364,Zenith Aerospace Systems Limited,543999,"Promoter lock-in (capex objects, 1y)",—,PROMOTER,ALLOTMENT,2026-09-10,,0.45,PENDING
+2028-03-10,546,Zenith Aerospace Systems Limited,543999,Promoter minimum-contribution lock-in,—,PROMOTER,ALLOTMENT,2026-09-10,,0.45,PENDING
+2029-09-10,1095,Zenith Aerospace Systems Limited,543999,"Promoter lock-in (capex objects, 3y)",—,PROMOTER,ALLOTMENT,2026-09-10,,0.45,PENDING

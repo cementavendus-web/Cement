@@ -4,6 +4,8 @@ Three jobs, mirroring how BSE actually disseminates:
 
 * ``intraday``      — short window, every 15 minutes through the trading day.
 * ``evening_sweep`` — wider window after close, catching post-market filings.
+* ``calendar``      — nightly re-derivation of the forward deadline calendar.
+* ``brief``         — the ranked sell-down brief at 02:30 UTC = 08:00 IST.
 * ``backfill``      — weekly reconciliation over the last 7 days, which repairs
   anything a failed intraday run missed. Because ingestion is idempotent this
   simply no-ops over filings already stored.
@@ -29,6 +31,8 @@ def crontab_lines(config: Any) -> str:
         [
             f"{cfg.get('intraday_cron', '*/15 6-16 * * 1-5')} {entrypoint} run >> /var/log/bse_intraday.log 2>&1",
             f"{cfg.get('evening_sweep_cron', '30 16 * * 1-5')} {entrypoint} run --days 2 >> /var/log/bse_evening.log 2>&1",
+            f"{cfg.get('calendar_cron', '0 1 * * *')} {entrypoint} calendar refresh >> /var/log/bse_calendar.log 2>&1",
+            f"{cfg.get('brief_cron', '30 2 * * 1-5')} {entrypoint} daily-brief >> /var/log/bse_brief.log 2>&1  # 02:30 UTC = 08:00 IST",
             f"{cfg.get('backfill_cron', '0 2 * * 6')} {entrypoint} backfill --days 7 >> /var/log/bse_backfill.log 2>&1",
         ]
     )
@@ -50,6 +54,8 @@ def build_scheduler(config: Any, run_callable: Callable[..., Any]) -> Optional[A
         "evening_sweep": {"cron": cfg.get("evening_sweep_cron", "30 16 * * 1-5"), "kwargs": {"days": 2}},
         "backfill": {"cron": cfg.get("backfill_cron", "0 2 * * 6"), "kwargs": {"days": 7}},
     }
+    # The daily brief is a different callable, registered by main.py when it
+    # builds the scheduler, so it is not part of the scrape-job table above.
     for name, spec in jobs.items():
         scheduler.add_job(
             run_callable,

@@ -32,13 +32,27 @@ services:
       BSE_APP_LOG_FILE: /app/data/logs/bse_monitor.log
       BSE_PDF_DOWNLOAD_DIR: /app/data/pdfs
       BSE_ALERTS_CHANNELS_CSV_OUTPUT_DIR: /app/data/exports
+      BSE_BRIEF_OUTPUT_DIR: /app/data/briefs
+      BSE_MODEL_PANEL_DIR: /app/data/panel
+      BSE_MODEL_MODEL_PATH: /app/data/models/selldown_lgbm.joblib
+      BSE_BRIEF_MODEL_PATH: /app/data/models/selldown_lgbm.joblib
+      # Layer 2. Leave BSE_LLM_ENABLED unset to run rules-only.
+      BSE_LLM_ENABLED: ${LLM_ENABLED:-false}
+      BSE_LLM_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # SMTP for the 08:00 IST brief.
+      BSE_ALERTS_CHANNELS_EMAIL_SMTP_HOST: ${SMTP_HOST:-}
+      BSE_ALERTS_CHANNELS_EMAIL_SMTP_PORT: ${SMTP_PORT:-587}
+      BSE_ALERTS_CHANNELS_EMAIL_USERNAME: ${SMTP_USERNAME:-}
+      BSE_ALERTS_CHANNELS_EMAIL_SENDER: ${SMTP_SENDER:-bse-monitor@example.com}
       BSE_ALERTS_SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
       BSE_ALERTS_CHANNELS_SLACK_ENABLED: ${SLACK_ENABLED:-false}
       BSE_ALERTS_CHANNELS_TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL:-}
       BSE_ALERTS_CHANNELS_EMAIL_PASSWORD: ${SMTP_PASSWORD:-}
     volumes:
       - appdata:/app/data
-    command: ["init-db"]
+    # --upgrade also applies additive column migrations; create_all() only ever
+    # creates missing tables, never adds a column to an existing one.
+    command: ["init-db", "--upgrade"]
     restart: "no"
 
   # Long-running scheduler: intraday, evening sweep and weekly backfill.

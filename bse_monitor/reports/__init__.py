@@ -1,5 +1,6 @@
 """Reporting views over the filings database."""
 
+from .brief import BRIEF_COLUMNS, BriefResult, brief_body, build_brief, write_brief_csv
 from .calendar import (
     CALENDAR_COLUMNS,
     TRIGGER_LABELS,
@@ -19,6 +20,11 @@ from .pipelines import (
 
 __all__ = [
     "DAILY_COLUMNS",
+    "BRIEF_COLUMNS",
+    "BriefResult",
+    "build_brief",
+    "write_brief_csv",
+    "brief_body",
     "CALENDAR_COLUMNS",
     "TRIGGER_LABELS",
     "upcoming_triggers_report",

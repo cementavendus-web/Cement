@@ -11,8 +11,10 @@ app:
   log_file: ./data/logs/bse_monitor.log
 
 database:
-  # Overridden in Docker by BSE_DATABASE_URL.
-  url: postgresql+psycopg2://bse:bse@localhost:5432/bse_monitor
+  # SQLite by default so state persists across runs with nothing to provision.
+  # The schema is backend-agnostic; point BSE_DATABASE_URL at PostgreSQL for a
+  # multi-writer deployment.
+  url: sqlite:///./data/bse_monitor.db
   echo: false
   pool_size: 5
   max_overflow: 10
@@ -188,10 +190,36 @@ alerts:
       webhook_url: ""
       min_priority: HIGH
 
+brief:
+  # The daily 08:00 IST ranked sell-down brief.
+  enabled: true
+  top_n: 40
+  min_score: 0.0
+  output_dir: ./data/briefs
+  model_path: ./data/models/selldown_lgbm.joblib
+  # Attach the ranked CSV rather than inlining it: a 40-row table pasted into an
+  # email body is unreadable, an attachment opens in a spreadsheet.
+  attach_csv: true
+  recipients:
+    - ram.narayan@avendusspark.com
+  subject_prefix: "BSE sell-down brief"
+
+model:
+  panel_dir: ./data/panel
+  model_path: ./data/models/selldown_lgbm.joblib
+  label_horizon_days: 60
+  label_pct_threshold: 0.5
+  label_value_threshold_cr: 100
+  embargo_days: 60
+  top_k: 20
+  num_boost_round: 300
+
 scheduler:
   enabled: true
   # BSE disseminates continuously through the trading day; a 15-minute cadence
   # during market hours with a wider evening sweep catches post-close filings.
   intraday_cron: "*/15 6-16 * * 1-5"     # UTC ≈ 11:30-22:00 IST
+  brief_cron: "30 2 * * 1-5"             # 02:30 UTC = 08:00 IST
+  calendar_cron: "0 1 * * *"             # nightly calendar refresh
   evening_sweep_cron: "30 16 * * 1-5"    # UTC ≈ 22:00 IST
   backfill_cron: "0 2 * * 6"             # Saturday reconciliation sweep

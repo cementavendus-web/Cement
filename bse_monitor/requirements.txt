@@ -28,6 +28,12 @@ anthropic>=0.70,<2
 # --- scraping fallback -----------------------------------------------------
 playwright>=1.42,<2           # then: playwright install --with-deps chromium
 
+# --- sell-down model (Layer 3) ---------------------------------------------
+lightgbm>=4.0,<5
+shap>=0.44,<1
+pyarrow>=14.0             # Parquet panel partitions; CSV fallback without it
+python-dateutil>=2.8,<3
+
 # --- scheduling ------------------------------------------------------------
 APScheduler>=3.10,<4
 

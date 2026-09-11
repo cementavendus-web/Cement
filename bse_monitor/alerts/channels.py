@@ -12,6 +12,7 @@ import csv
 import datetime as dt
 import json
 import logging
+import mimetypes
 import smtplib
 from email.message import EmailMessage
 from pathlib import Path
@@ -44,7 +45,19 @@ class BaseChannel:
 class EmailChannel(BaseChannel):
     name = "email"
 
-    def send(self, title: str, body: str, priority: str = "LOW") -> Tuple[bool, Optional[str]]:
+    def send(
+        self,
+        title: str,
+        body: str,
+        priority: str = "LOW",
+        attachments: Optional[Sequence[str | Path]] = None,
+    ) -> Tuple[bool, Optional[str]]:
+        """Send, optionally attaching files.
+
+        The daily brief's ranked CSV is attached rather than pasted: a 40-row
+        table inlined into an email body is unreadable and unusable, while an
+        attachment opens in a spreadsheet.
+        """
         recipients = self.config.get("recipients") or []
         if not recipients:
             return False, "no recipients configured"
@@ -53,6 +66,21 @@ class EmailChannel(BaseChannel):
         message["From"] = self.config.get("sender", "bse-monitor@localhost")
         message["To"] = ", ".join(recipients)
         message.set_content(body)
+
+        for raw_path in attachments or []:
+            path = Path(raw_path)
+            if not path.exists():
+                log.warning("Attachment missing, skipping", extra={"path": str(path)})
+                continue
+            maintype, _, subtype = (
+                mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+            ).partition("/")
+            message.add_attachment(
+                path.read_bytes(),
+                maintype=maintype,
+                subtype=subtype or "octet-stream",
+                filename=path.name,
+            )
         try:
             host = self.config.get("smtp_host", "localhost")
             port = int(self.config.get("smtp_port", 25))

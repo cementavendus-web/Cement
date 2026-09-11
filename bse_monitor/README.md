@@ -1,15 +1,30 @@
 # BSE Filings Monitor
 
-A production-grade monitoring system for **BSE corporate announcements**. It
-scrapes filings continuously, classifies them into capital-raising and
-secondary-sale event types, extracts the structured facts out of the
-announcement text and its PDF attachment, scores each one for how actionable it
-is, and pushes the results to Email / Slack / Teams / CSV.
+A three-layer system for anticipating **share sales in Indian listed companies**.
 
-The output is a queryable database of companies that **may raise capital** (IPO,
-FPO, QIP, rights issue, preferential allotment) or **may see significant
-secondary supply** (OFS, block deals, promoter dilution, PE/VC exits, anchor
-lock-in expiries).
+1. **Calendar** — a forward register of statutory deadlines (anchor and promoter
+   lock-in expiries, MPS compliance, QIP resolution expiry, post-results trading
+   window reopen). These are knowable in advance and carry the most signal.
+2. **Events** — every new Regulation 30 filing is classified by a weighted-lexicon
+   rule engine and, for the ones that matter, read by **Claude Haiku** into strict
+   JSON (`event_class, holder, holder_type, stake_pct, effective_date, confidence`).
+3. **Model** — a company × holder × week panel labelled from a decade of realised
+   sell events, ranked by LightGBM against a transparent baseline, evaluated
+   walk-forward.
+
+The daily output is a ranked CSV emailed at **08:00 IST**: company, holder, stake
+in ₹cr, days to the nearest hard trigger, and the top-3 model reasons.
+
+```
+python -m bse_monitor.main daily-brief
+```
+
+| Layer | Table | Command |
+|---|---|---|
+| 1 Calendar | `upcoming_triggers` | `calendar refresh` · `calendar list` |
+| 2 Events | `llm_extractions` | `llm status` · `llm dry-run` |
+| 3 Model | `disposals`, `daily_quotes` | `model panel` · `model train` · `model evaluate` |
+| Output | — | `daily-brief` |
 
 ---
 
@@ -330,8 +345,14 @@ not installed, `main.py schedule --print-cron` emits an equivalent crontab.
 ## 9. Tests
 
 ```bash
-python -m pytest bse_monitor/tests -q        # 141 tests, no network, no services
+python -m pytest bse_monitor/tests -q        # 341 tests, no network, no services
 ```
+
+Everything runs offline: `anthropic` is an optional import, the LLM client takes
+an injected fake, and an autouse fixture scrubs `ANTHROPIC_*` and `BSE_LLM_*`
+from the environment — `Config.load()` applies env overrides, so a developer with
+`BSE_LLM_ENABLED=true` exported would otherwise turn the suite into a live,
+billed run.
 
 Coverage includes: lexicon classification across all ten categories, negation and
 disambiguation, score monotonicity and non-saturation, money/share/price/date
@@ -382,7 +403,144 @@ from shares × floor price, because the filing states no aggregate.
 
 ---
 
-## 11. Operational notes and limits
+## 11. The three layers in detail
+
+### Layer 1 — the forward calendar
+
+Ten statutory trigger types, each derived from a filing and stored in
+`upcoming_triggers` with a **sha256 natural key** over (company, type, anchor
+date, subject, rule version).
+
+That key is the design's load-bearing detail. `replace_transactions()` deletes
+and recreates transaction rows on every re-extraction, so a calendar hung off
+them would lose its identity — and the alert history pointing at it — on every
+run. Deadlines are instead updated in place, **cancelled rather than deleted**
+when they stop deriving, and **superseded** (not overwritten) when the rule
+version moves.
+
+`days_to_trigger` is never stored; it is computed against an injected `as_of`.
+Date arithmetic differs between SQLite and PostgreSQL, so a stored or hybrid
+column would pass the tests and misbehave in production.
+
+Offsets are configuration, not constants — SEBI has already moved the promoter
+minimum-contribution lock-in from 3 years to 18 months and split anchor lock-ins
+into 30/90-day tranches. Month arithmetic is hand-rolled with end-of-month
+clamping (`31 Aug + 6m → 28 Feb`, `29 Feb + 12m → 28 Feb`); the
+`timedelta(days=182)` shortcut is wrong for a statutory deadline and is asserted
+against.
+
+**Known gap:** MPS deadlines need current public shareholding, which comes from
+Reg-31 patterns — the source deliberately deferred. They are seeded from a
+reviewable watchlist rather than derived. Every other trigger type is automatic.
+
+### Layer 2 — Haiku event extraction
+
+Rule-prefiltered and synchronous: only filings the rule engine already finds
+interesting, or cannot confidently classify, are sent — a few hundred calls a day
+rather than all ~3,000. The trade is explicit: **the rules become the recall
+ceiling.**
+
+Dedupe is a database guarantee, not bookkeeping. `announcement_id` is uniquely
+constrained and claimed *before* the API call, so a crash mid-flight cannot cause
+a re-send and therefore cannot double-charge.
+
+`coerce_event` clamps every model output onto the taxonomy before it reaches the
+database. `EventFiling.category` has a CHECK constraint, so an unvalidated
+`event_class` fails the INSERT and takes the whole filing down with it. A clamped
+verdict also has its confidence zeroed, so a degraded read cannot masquerade as
+evidence.
+
+Reconciliation reuses `classifier.ml.blend` rather than inventing a second
+policy: a confident rule verdict wins outright, and the model may override only a
+low-confidence or `Other` verdict.
+
+**On prompt caching, measured rather than assumed:** Haiku 4.5 will not cache a
+prefix under **4096 tokens**, and does not error when it declines — it returns
+`cache_creation_input_tokens: 0` forever. This prefix is ~3,000. Padding it to
+clear the floor buys about **$120/year** at ~200 calls/day, which does not justify
+diluting a prompt tuned for accuracy. The markers stay (free, and auto-engage if
+the prefix or model changes) and the client logs a warning the first time it sees
+a dead cache.
+
+### Layer 3 — labels, panel and model
+
+**Label:** a holder disposing of ≥0.5% of equity **or** ≥₹100 crore within 60
+days. Two properties matter more than the thresholds — the window is strictly
+forward (a trade on `week_end` belongs to the features, not the label), and rows
+are deduplicated before summing.
+
+**Cross-source dedupe** is why `disposals` exists. The same block deal is
+published by both exchanges and often filed a third time as a SAST 29(2)
+disclosure; keying on the economics rather than the source stops one sale being
+counted three times and trebling every label it touches.
+
+**Point-in-time discipline.** Every feature function takes an `as_of` and reads
+only rows strictly before it. A test walks the feature module's **AST** for any
+`today()`/`now()` call, because a single wall-clock read trains the model on the
+future and fails silently — nothing crashes, the metrics just improve. Calendar
+features filter on `known_from_date`, not `trigger_date`: a March lock-in expiry
+was only knowable from the filing that disclosed the allotment.
+
+**Evaluation** is walk-forward by year with a 60-day embargo matching the label
+horizon. `precision@20` is computed per week then averaged, not pooled — the desk
+reads a fresh top-20 each week. Median lead time is reported alongside, because a
+model that fires the day before a block is accurate and useless.
+
+See [`examples/model_walkforward_report.md`](examples/model_walkforward_report.md).
+
+### Two honest limitations
+
+**LLM features are absent from v1.** The LLM layer only produces rows from
+go-live, and backfilling it over the full history is ~7.5M filings. Including
+them would leave the historical panel mostly null and the model would learn
+`llm_present` as a proxy for `recent`. They enter as a separate block in a later
+retrain; `feature_set_version` is stamped on every artefact and **checked on
+load with a refusal**, because scoring across feature sets is a wrong answer
+rather than an error.
+
+**The holder universe is survivorship-shaped.** Holders are bootstrapped from
+their own observed activity, so one sitting on 8% and doing nothing is invisible
+until its first trade. `HolderUniverse` is a Protocol precisely so a Reg-31
+shareholding-pattern source can replace the bootstrap without touching feature or
+training code.
+
+---
+
+## 12. Deployment
+
+```bash
+cp bse_monitor/docker/.env.example bse_monitor/docker/.env   # then edit
+docker compose -f bse_monitor/docker/docker-compose.yml up -d
+```
+
+Jobs, all UTC:
+
+| Job | Cron | Purpose |
+|---|---|---|
+| intraday | `*/15 6-16 * * 1-5` | scrape + classify |
+| calendar | `0 1 * * *` | re-derive deadlines |
+| **brief** | `30 2 * * 1-5` | **08:00 IST ranked email** |
+| backfill | `0 2 * * 6` | weekly reconciliation |
+
+**First run on your infrastructure**, in order:
+
+```bash
+python -m bse_monitor.main init-db --upgrade
+python -m bse_monitor.main backfill --from 2015-01-01 --to 2025-12-31   # deals
+python -m bse_monitor.main model coverage        # check SAST coverage per year
+python -m bse_monitor.main model panel
+python -m bse_monitor.main model evaluate --out walkforward.md
+python -m bse_monitor.main model train
+python -m bse_monitor.main daily-brief --dry-run
+```
+
+`init-db --upgrade` matters on an already-deployed database: `create_all()` only
+ever creates *missing tables* and never adds a column to an existing one, so
+`daily_alerts.trigger_id` needs the explicit additive migration.
+
+---
+
+## 13. Operational notes and limits
 
 * **Respect the source.** Default 2 req/s with backoff. BSE publishes no public
   API terms for this endpoint; check your own compliance position before running

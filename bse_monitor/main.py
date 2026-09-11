@@ -33,7 +33,11 @@ from .database.session import create_all, init_engine, session_scope
 from .logging_setup import setup_logging
 from .pipeline import MonitorPipeline
 from .reports import (
+    BRIEF_COLUMNS,
     CALENDAR_COLUMNS,
+    brief_body,
+    build_brief,
+    write_brief_csv,
     DAILY_COLUMNS,
     calendar_digest,
     company_watchlist,
@@ -72,9 +76,51 @@ def _parse_date(value: Optional[str]) -> Optional[dt.date]:
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
+# Columns added to pre-existing tables after the first release. create_all()
+# only creates MISSING TABLES — it never adds a column to a table that already
+# exists, so an already-deployed database needs these applied explicitly.
+# Each is written to be safe to run repeatedly.
+_UPGRADES: Sequence[tuple[str, str]] = (
+    (
+        "daily_alerts.trigger_id",
+        "ALTER TABLE daily_alerts ADD COLUMN trigger_id INTEGER "
+        "REFERENCES upcoming_triggers(id) ON DELETE CASCADE",
+    ),
+)
+
+
+def _apply_upgrades() -> list[str]:
+    """Apply additive column migrations, skipping ones already present."""
+    from sqlalchemy import inspect, text
+
+    from .database.session import get_engine
+
+    engine = get_engine()
+    inspector = inspect(engine)
+    applied: list[str] = []
+
+    with engine.begin() as connection:
+        for label, statement in _UPGRADES:
+            table, column = label.split(".")
+            if table not in inspector.get_table_names():
+                continue
+            existing = {col["name"] for col in inspector.get_columns(table)}
+            if column in existing:
+                continue
+            try:
+                connection.execute(text(statement))
+                applied.append(label)
+            except Exception as exc:  # pragma: no cover - backend differences
+                log.warning("Upgrade failed", extra={"column": label, "error": str(exc)})
+    return applied
+
+
 def cmd_init_db(args: argparse.Namespace) -> int:
     bootstrap(args)
     create_all()
+    if getattr(args, "upgrade", False):
+        applied = _apply_upgrades()
+        print(json.dumps({"upgrades_applied": applied or "none needed"}, indent=2))
     with session_scope() as session:
         print(json.dumps(repo.counts(session), indent=2))
     print("Schema ready.")
@@ -177,6 +223,117 @@ def cmd_report(args: argparse.Namespace) -> int:
         if args.csv:
             path = write_csv(rows, args.csv, columns)
             print(f"Wrote {len(rows)} rows to {path}")
+    return 0
+
+
+def cmd_daily_brief(args: argparse.Namespace) -> int:
+    """Refresh the calendar, rank live positions, write the CSV, send it.
+
+    Idempotent: re-running for the same date overwrites that date's CSV and
+    re-sends nothing that has not changed.
+    """
+    config = bootstrap(args)
+    create_all()
+    from .alerts.channels import EmailChannel
+    from .triggers.refresh import expire_triggers, refresh_calendar
+
+    as_of = _parse_date(args.date) or dt.date.today()
+    out_dir = config.resolve_path("brief.output_dir", "./data/briefs")
+
+    with session_scope() as session:
+        if not args.no_refresh:
+            refresh_calendar(session, since=as_of - dt.timedelta(days=args.refresh_days))
+            expire_triggers(session, as_of=as_of)
+
+        result = build_brief(
+            session,
+            as_of=as_of,
+            top_n=args.top_n or int(config.get("brief.top_n", 40)),
+            model_path=args.model or config.get("brief.model_path"),
+            min_score=float(config.get("brief.min_score", 0.0)),
+        )
+        path = write_brief_csv(result, out_dir)
+
+    print(json.dumps(result.as_dict(), indent=2))
+    print()
+    print(markdown_table(result.rows[:20], list(BRIEF_COLUMNS)))
+
+    if args.dry_run:
+        print(f"\n[dry-run] would email {config.get('brief.recipients')}")
+        return 0
+
+    recipients = config.get("brief.recipients") or []
+    email_cfg = dict(config.get("alerts.channels.email", {}) or {})
+    email_cfg["recipients"] = recipients
+    email_cfg["enabled"] = True
+    channel = EmailChannel(email_cfg)
+    subject = (
+        f"{config.get('brief.subject_prefix', 'BSE sell-down brief')} — "
+        f"{as_of.isoformat()} ({len(result.rows)} names)"
+    )
+    attachments = [path] if config.get("brief.attach_csv", True) else None
+    ok, error = channel.send(subject, brief_body(result), "HIGH", attachments=attachments)
+    print(json.dumps({"emailed": ok, "recipients": recipients, "error": error}, indent=2))
+    return 0 if ok else 2
+
+
+def cmd_model(args: argparse.Namespace) -> int:
+    """Build the panel, train, or run the walk-forward evaluation."""
+    config = bootstrap(args)
+    create_all()
+    from .model.evaluate import format_report
+    from .model.labels import LabelSpec, coverage_report
+    from .model.panel import build_panel, panel_stats, read_panel, write_panel
+    from .model.train import save_model, train, walk_forward
+
+    panel_dir = config.resolve_path("model.panel_dir", "./data/panel")
+    spec = LabelSpec(
+        horizon_days=int(config.get("model.label_horizon_days", 60)),
+        pct_threshold=float(config.get("model.label_pct_threshold", 0.5)),
+        value_threshold_inr=float(config.get("model.label_value_threshold_cr", 100)) * 1e7,
+    )
+
+    with session_scope() as session:
+        if args.action == "coverage":
+            rows = coverage_report(session)
+            print(markdown_table(rows, ["year", "total", "sast_share", "value_coverage", "pct_coverage"]))
+            return 0
+
+        if args.action == "panel":
+            start = _parse_date(args.from_date) or dt.date(2015, 1, 1)
+            end = _parse_date(args.to_date) or dt.date.today()
+            rows = list(build_panel(session, start, end, spec=spec))
+            stats = panel_stats(rows)
+            written = write_panel(rows, panel_dir)
+            print(json.dumps({**stats.as_dict(), "files": written}, indent=2))
+            return 0
+
+    frame = read_panel(panel_dir)
+    if frame.empty:
+        print("No panel found. Run `model panel` first.")
+        return 1
+    rows = frame.to_dict("records")
+
+    if args.action == "train":
+        model = train(rows, num_boost_round=int(config.get("model.num_boost_round", 300)))
+        if model is None:
+            print("Training skipped (LightGBM missing, or a single-class panel).")
+            return 1
+        path = save_model(model, args.model or config.get("model.model_path"))
+        print(json.dumps({"path": str(path), "rows": model.n_rows,
+                          "base_rate": round(model.base_rate, 6),
+                          "feature_set_version": model.feature_set_version}, indent=2))
+        return 0
+
+    folds = walk_forward(
+        rows,
+        embargo_days=int(config.get("model.embargo_days", 60)),
+        k=int(config.get("model.top_k", 20)),
+    )
+    print(format_report(folds, k=int(config.get("model.top_k", 20))))
+    if args.out:
+        Path(args.out).write_text(format_report(folds), encoding="utf-8")
+        print(f"\nWrote {args.out}")
     return 0
 
 
@@ -437,7 +594,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--log-level", help="override app.log_level")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("init-db", help="create tables").set_defaults(func=cmd_init_db)
+    init_db = sub.add_parser("init-db", help="create tables")
+    init_db.add_argument(
+        "--upgrade",
+        action="store_true",
+        help="also apply additive column migrations to an existing database",
+    )
+    init_db.set_defaults(func=cmd_init_db)
 
     run_parser = sub.add_parser("run", help="scrape, classify and alert")
     run_parser.add_argument("--from", dest="from_date", help="YYYY-MM-DD")
@@ -505,6 +668,23 @@ def build_parser() -> argparse.ArgumentParser:
     llm.add_argument("--text", help="dry-run: filing body")
     llm.add_argument("--since", help="cost: YYYY-MM-DD")
     llm.set_defaults(func=cmd_llm)
+
+    brief = sub.add_parser("daily-brief", help="ranked sell-down brief + email")
+    brief.add_argument("--date", help="YYYY-MM-DD (default today)")
+    brief.add_argument("--top-n", type=int)
+    brief.add_argument("--model", help="path to a trained model artefact")
+    brief.add_argument("--refresh-days", type=int, default=30)
+    brief.add_argument("--no-refresh", action="store_true", help="skip the calendar refresh")
+    brief.add_argument("--dry-run", action="store_true", help="print, do not email")
+    brief.set_defaults(func=cmd_daily_brief)
+
+    model = sub.add_parser("model", help="panel, training and evaluation")
+    model.add_argument("action", choices=["panel", "train", "evaluate", "coverage"])
+    model.add_argument("--from", dest="from_date")
+    model.add_argument("--to", dest="to_date")
+    model.add_argument("--model", help="artefact path")
+    model.add_argument("--out", help="write the evaluation report here")
+    model.set_defaults(func=cmd_model)
 
     seed = sub.add_parser("seed-demo", help="load bundled sample filings")
     seed.add_argument("--file", help="path to a filings JSON file")
