@@ -1,0 +1,11 @@
+date,company,bse_code,event_type,investor,value,score,priority,certainty,headline,pdf_url
+2026-09-09,Vantage Infratech Limited,500325,QIP,—,"Rs 1,200.0 Cr",91,HIGH,approved,"Board approves fund raising of up to Rs. 1,200 crore by way of Qualified Institutions Placement",
+2026-09-10,Meridian Healthcare Services Limited,532541,OFS,—,"Rs 1,862.5 Cr",95,HIGH,intended,Intimation of Offer for Sale by Promoter Selling Shareholder,
+2026-09-10,Solaris Digital Payments Limited,540719,InvestorExit,Blackstone,"Rs 5,400.0 Cr",96,HIGH,completed,Disclosure under Regulation 29(2) - Blackstone Capital Partners divested its entire stake,
+2026-09-11,Northgate Consumer Brands Limited,543320,RightsIssue,—,—,80,MEDIUM,intended,Intimation of Board Meeting to consider fund raising through Rights Issue,
+2026-09-11,Auralux Speciality Chemicals Limited,544102,InvestorExit,—,—,91,HIGH,unknown,Expiry of anchor investor lock-in period,
+2026-09-11,Kesar Agro Industries Limited,500180,PreferentialAllotment,—,Rs 105.0 Cr,85,HIGH,approved,Preferential allotment of convertible warrants to promoter group,
+2026-09-11,Trident Logistics Corporation Limited,532978,Other,—,—,10,LOW,unknown,Newspaper publication of unaudited financial results for the quarter ended 30 June 2026,
+2026-09-11,Pinnacle Housing Finance Limited,533398,Other,—,—,10,LOW,unknown,Clarification - the Board did not approve the proposed fund raise,
+2026-09-11,Helios Renewable Power Limited,543257,InvestorExit,"General Atlantic, ChrysCapital","Rs 1,900.0 Cr",95,HIGH,unknown,Disclosure of sale of shares by ChrysCapital and General Atlantic,
+2026-09-11,Zenith Aerospace Systems Limited,543999,IPO,Warburg Pincus,"Rs 2,400.0 Cr",86,HIGH,unknown,Filing of Draft Red Herring Prospectus with SEBI for Initial Public Offering,

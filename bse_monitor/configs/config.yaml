@@ -1,0 +1,134 @@
+# ---------------------------------------------------------------------------
+# Runtime configuration. Every value can be overridden by an environment
+# variable named BSE_<SECTION>_<KEY> (see config.py), so the same file is safe
+# to commit and Docker only needs to inject secrets.
+# ---------------------------------------------------------------------------
+app:
+  name: bse-monitor
+  timezone: Asia/Kolkata
+  data_dir: ./data
+  log_level: INFO
+  log_file: ./data/logs/bse_monitor.log
+
+database:
+  # Overridden in Docker by BSE_DATABASE_URL.
+  url: postgresql+psycopg2://bse:bse@localhost:5432/bse_monitor
+  echo: false
+  pool_size: 5
+  max_overflow: 10
+
+scraper:
+  # Announcement categories pulled from BSE. "Company Update" and "Result" are
+  # noisy but carry a meaningful share of fund-raise disclosures.
+  bse_categories:
+    - Company Update
+    - Corp. Action
+    - Board Meeting
+    - AGM/EGM
+    - Result
+    - New Listing
+  lookback_days: 3            # window used when no checkpoint exists
+  max_pages_per_category: 25
+  request_timeout_seconds: 30
+  rate_limit_per_second: 2.0
+  max_retries: 5
+  backoff_base_seconds: 2.0
+  backoff_max_seconds: 60.0
+  user_agent: >-
+    Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+    (KHTML, like Gecko) Chrome/124.0 Safari/537.36
+  use_playwright_fallback: true
+  playwright_headless: true
+  enable_nse: false
+  enable_sebi: false
+
+pdf:
+  enabled: true
+  download_dir: ./data/pdfs
+  max_bytes: 52428800         # 50 MB guard
+  max_pages_text: 60
+  ocr_enabled: true
+  ocr_language: eng
+  ocr_dpi: 200
+  ocr_max_pages: 12
+  # Below this many extracted characters per page the text layer is considered
+  # absent and the OCR fallback kicks in.
+  ocr_trigger_chars_per_page: 120
+  extract_tables: true
+  concurrency: 4
+
+classifier:
+  min_confidence: 0.35        # below this a filing is tagged Other
+  use_ml_model: false
+  ml_model_path: ./data/models/filing_clf.joblib
+  spacy_model: en_core_web_sm
+
+scoring:
+  # Category base scores, straight from the event-detection spec.
+  base_scores:
+    PromoterSale: 95
+    QIP: 90
+    InvestorExit: 90
+    OFS: 92
+    BlockDeal: 88
+    IPO: 80
+    FPO: 82
+    RightsIssue: 78
+    PreferentialAllotment: 80
+    FundRaise: 85
+    Other: 20
+  certainty_modifiers:
+    completed: 6
+    approved: 8
+    intended: 3
+    unknown: 0
+  amount_modifiers:            # INR crore thresholds, first match wins
+    - {min_cr: 5000, bonus: 10}
+    - {min_cr: 1000, bonus: 7}
+    - {min_cr: 250,  bonus: 4}
+    - {min_cr: 50,   bonus: 2}
+  marquee_investor_bonus: 5
+  promoter_involved_bonus: 5
+  large_stake_bonus: 5         # when extracted stake % exceeds threshold
+  large_stake_threshold_pct: 5.0
+  lock_in_window_bonus: 4      # lock-in expiring inside horizon_days
+  lock_in_horizon_days: 45
+  recency_decay_per_day: 1.5   # subtracted per day of filing age
+  recency_max_penalty: 12
+  low_confidence_penalty: 10   # applied when confidence < classifier.min_confidence
+
+alerts:
+  enabled: true
+  high_priority_min_score: 85
+  medium_priority_min_score: 65
+  # Categories that are always high priority regardless of score.
+  always_high_categories: [OFS, PromoterSale, InvestorExit, QIP]
+  channels:
+    csv:
+      enabled: true
+      output_dir: ./data/exports
+    email:
+      enabled: false
+      smtp_host: smtp.example.com
+      smtp_port: 587
+      use_tls: true
+      username: ""
+      password: ""           # inject via BSE_ALERTS_EMAIL_PASSWORD
+      sender: bse-monitor@example.com
+      recipients: []
+    slack:
+      enabled: false
+      webhook_url: ""        # inject via BSE_ALERTS_SLACK_WEBHOOK_URL
+      min_priority: HIGH
+    teams:
+      enabled: false
+      webhook_url: ""
+      min_priority: HIGH
+
+scheduler:
+  enabled: true
+  # BSE disseminates continuously through the trading day; a 15-minute cadence
+  # during market hours with a wider evening sweep catches post-close filings.
+  intraday_cron: "*/15 6-16 * * 1-5"     # UTC ≈ 11:30-22:00 IST
+  evening_sweep_cron: "30 16 * * 1-5"    # UTC ≈ 22:00 IST
+  backfill_cron: "0 2 * * 6"             # Saturday reconciliation sweep

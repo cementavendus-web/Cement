@@ -1,0 +1,83 @@
+{
+  "classification": {
+    "category": "BlockDeal",
+    "confidence": 0.5556,
+    "secondary": [],
+    "certainty": "intended",
+    "method": "rules",
+    "evidence": {
+      "top_category": "BlockDeal",
+      "top_evidence": 0.5556,
+      "matched_terms": [
+        "block deal"
+      ],
+      "negated_terms": [],
+      "all_scores": {
+        "BlockDeal": {
+          "evidence": 0.5556,
+          "confidence": 0.5556
+        }
+      },
+      "below_threshold": false,
+      "disambiguation_applied": []
+    }
+  },
+  "extraction": {
+    "amount_inr": 54000000000.0,
+    "amount_raw": "Rs. 5,400 crore",
+    "amount_derived": false,
+    "num_shares": 18000000.0,
+    "price_per_share": null,
+    "percent_of_equity": 8.4,
+    "lock_in_expiry_date": null,
+    "board_meeting_date": null,
+    "record_date": null,
+    "investors": [
+      "Blackstone"
+    ],
+    "promoters": [],
+    "promoter_involved": false,
+    "marquee_investor": true
+  },
+  "score": 95,
+  "priority": "HIGH",
+  "breakdown": {
+    "components": [
+      {
+        "component": "base",
+        "detail": "BlockDeal",
+        "value": 88.0
+      },
+      {
+        "component": "certainty",
+        "detail": "intended",
+        "value": 3.0
+      },
+      {
+        "component": "deal_size",
+        "detail": "~Rs 5,400 Cr",
+        "value": 10.0
+      },
+      {
+        "component": "marquee_investor",
+        "detail": null,
+        "value": 5.0
+      },
+      {
+        "component": "large_stake",
+        "detail": "8.40%",
+        "value": 5.0
+      }
+    ],
+    "base": 88.0,
+    "bonus_raw": 23.0,
+    "bonus_max": 37.0,
+    "headroom": 12.0,
+    "bonus_scaled": 7.46,
+    "penalties": 0,
+    "raw_total": 95.46,
+    "clamped": 95,
+    "priority": "HIGH",
+    "model_version": "score-v1"
+  }
+}

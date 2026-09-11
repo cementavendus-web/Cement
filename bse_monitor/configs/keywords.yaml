@@ -1,0 +1,341 @@
+# ---------------------------------------------------------------------------
+# Classification lexicon.
+#
+# Every category carries three weighted tiers. The rule engine sums the weight
+# of each matched term (counting a term once, no matter how often it repeats)
+# and divides by the category's saturation constant to get an evidence score.
+#
+#   strong : near-decisive for the category      (weight 10)
+#   medium : supportive, needs corroboration     (weight 5)
+#   weak   : contextual, breaks ties only        (weight 2)
+#
+# `requires_any` is a guard: the category cannot fire unless at least one of
+# these terms is present. It kills the classic false positive where a routine
+# disclosure merely name-drops "QIP" in a list of past corporate actions.
+# ---------------------------------------------------------------------------
+version: 3
+tier_weights:
+  strong: 10
+  medium: 5
+  weak: 2
+
+categories:
+
+  IPO:
+    saturation: 22
+    strong:
+      - initial public offering
+      - initial public offer
+      - draft red herring prospectus
+      - red herring prospectus
+      - drhp
+      - rhp
+      - "ipo"
+    medium:
+      - prospectus
+      - listing of equity shares
+      - basis of allotment
+      - anchor investor
+      - issue opens
+      - issue closes
+      - fresh issue
+      - book running lead manager
+      - brlm
+    weak:
+      - sebi observation
+      - merchant banker
+      - registrar to the issue
+      - price band
+
+  FPO:
+    saturation: 18
+    strong:
+      - follow-on public offer
+      - follow on public offer
+      - further public offer
+      - "fpo"
+    medium:
+      - further issue of equity shares
+      - subsequent public issue
+    weak:
+      - public issue
+
+  QIP:
+    saturation: 20
+    strong:
+      - qualified institutions placement
+      - qualified institutional placement
+      - "qip"
+      - chapter vi of the sebi icdr
+    medium:
+      - qualified institutional buyers
+      - "qibs"
+      - floor price
+      - placement document
+      - preliminary placement document
+      - relevant date
+    weak:
+      - institutional placement programme
+      - icdr regulations
+
+  RightsIssue:
+    saturation: 18
+    strong:
+      - rights issue
+      - rights entitlement
+      - letter of offer
+    medium:
+      - rights basis
+      - renunciation
+      - "rights entitlements"
+      - record date for the rights
+    weak:
+      - entitlement ratio
+
+  PreferentialAllotment:
+    saturation: 18
+    strong:
+      - preferential allotment
+      - preferential issue
+      - on a preferential basis
+    medium:
+      - convertible warrants
+      - share warrants
+      - warrants convertible
+      - allotment of warrants
+      - regulation 160 of the sebi icdr
+    weak:
+      - warrants
+      - convertible securities
+
+  FundRaise:
+    saturation: 20
+    strong:
+      - fund raising
+      - fund raise
+      - raising of funds
+      - capital raising
+      - capital raise
+      - issue of shares
+      - issuance of securities
+    medium:
+      - foreign currency convertible bonds
+      - "fccb"
+      - global depository receipts
+      - "gdr"
+      - american depository receipts
+      - "adr"
+      - non-convertible debentures
+      - "ncd"
+      - debt raising
+      - borrowing limits
+      - enabling resolution
+      - convertible securities
+    weak:
+      - working capital requirements
+      - authorised share capital
+      - increase in authorised capital
+
+  OFS:
+    saturation: 20
+    strong:
+      - offer for sale
+      - "ofs"
+      - offer for sale through stock exchange mechanism
+    medium:
+      - seller shall offer
+      - t+1 settlement for ofs
+      - floor price for the offer
+      - non-retail investors
+      - retail portion of the offer
+    weak:
+      - clause 4 of the ofs circular
+
+  BlockDeal:
+    saturation: 18
+    strong:
+      - block deal
+      - bulk deal
+      - block trade
+    medium:
+      - block deal window
+      - negotiated deal
+      - "1% of the equity"
+      - 0.5% of the total shares
+    weak:
+      - executed on the stock exchange
+
+  InvestorExit:
+    saturation: 20
+    strong:
+      - investor exit
+      - complete exit
+      - full exit
+      - exited the company
+      - divested its entire stake
+      - "pe exit"
+      - "vc exit"
+      - strategic sale
+      - strategic stake sale
+    medium:
+      - reduction in shareholding
+      - shareholding reduction
+      - sell down
+      - sell-down
+      - secondary sale
+      - stake sale
+      - share disposal
+      - disposal of equity shares
+      - pared its stake
+      - trimmed its stake
+      - lock-in expiry
+      - lock in expiry
+      - expiry of lock-in
+      - expiry of the lock-in period
+      - lock-in period
+      - lock-in shall expire
+      - lock-in of the anchor
+      - anchor lock-in
+      - anchor investor lock-in
+    weak:
+      - regulation 29(2)
+      - regulation 29
+      - substantial acquisition of shares and takeovers
+
+  PromoterSale:
+    saturation: 20
+    strong:
+      - promoter sale
+      - promoter stake sale
+      - promoter dilution
+      - sale of shares by the promoter
+      - promoter group has sold
+      - promoters intend to sell
+      - encumbrance created by promoter
+    medium:
+      - promoter shareholding
+      - promoter and promoter group
+      - invocation of pledge
+      - revocation of pledge
+      - pledge of shares
+      - inter-se transfer
+      - regulation 31
+    weak:
+      - promoter group
+      - promoter
+
+# Verbs that establish how firm an event is. Drives the `certainty` modifier of
+# the opportunity score, not the category itself.
+certainty:
+  completed:
+    # Deliberately narrow: a bare "allotment of" also appears in the *proposal*
+    # for a preferential issue, which is an intention, not a completed event.
+    - has been allotted
+    - has allotted
+    - allotted the
+    - has completed
+    - has been completed
+    - stands completed
+    - has been concluded
+    - stands closed
+    - has been sold
+    - has sold
+    - was executed
+    - disposed of
+  approved:
+    - board has approved
+    - board approves
+    - approved the proposal
+    - has approved
+    - shareholders have approved
+    - approval of the board
+    - resolution passed
+    - has been approved
+    - approves
+    - approved
+    - granted approval
+  intended:
+    - intends to
+    - proposes to
+    - propose to
+    - is exploring
+    - is evaluating
+    - under consideration
+    - to consider
+    - may consider
+    - is considering
+    - plans to
+
+# Phrases that flip the meaning of an otherwise strong match.
+negations:
+  - has not
+  - does not propose
+  - no proposal
+  - did not approve
+  - deferred
+  - withdrawn
+  - has been withdrawn
+  - cancelled
+  - not been approved
+  - rejected
+
+# Boilerplate blocks that should never contribute evidence. Stripped before
+# scoring so that footer disclaimers stop polluting the lexicon match.
+boilerplate:
+  - this disclosure is being made pursuant to regulation 30
+  - the above information is also available on the website of the company
+  - this is for your information and records
+  - kindly take the same on record
+  - request you to take the above on record
+  - disclaimer
+
+# ---------------------------------------------------------------------------
+# Disambiguation rules.
+#
+# Some filings legitimately contain the decisive vocabulary of two categories,
+# where one of them is only historical context. The classic case is an anchor
+# lock-in expiry notice: it necessarily recites "allotted in the Initial Public
+# Offering", which would otherwise make it outrank the actual event.
+#
+# Each rule fires when ANY of `when_any` is present and NONE of `unless_any`
+# is. `suppress` multiplies those categories' evidence by `suppress_factor`;
+# `boost` multiplies the named category's evidence by `boost_factor`.
+# Applied rules are recorded in the filing's classification evidence, so a
+# demotion is always visible after the fact.
+# ---------------------------------------------------------------------------
+disambiguation:
+  - name: lock_in_expiry_is_not_an_ipo
+    when_any:
+      - lock in period
+      - lock in expiry
+      - expiry of the lock in period
+      - lock in shall expire
+      - anchor investor lock in
+    unless_any:
+      - draft red herring prospectus
+      - issue opens
+      - price band
+    suppress: [IPO, FPO]
+    boost: InvestorExit
+    suppress_factor: 0.25
+    boost_factor: 1.6
+
+  - name: ofs_inside_an_offer_document_is_part_of_the_ipo
+    when_any:
+      - draft red herring prospectus
+      - red herring prospectus
+      - drhp
+    suppress: [OFS]
+    suppress_factor: 0.3
+
+  - name: pledge_disclosure_is_not_a_sale
+    when_any:
+      - creation of pledge
+      - pledge of shares
+      - encumbrance created
+    unless_any:
+      - invocation of pledge
+      - sold
+      - offer for sale
+    suppress: [PromoterSale, BlockDeal]
+    suppress_factor: 0.5

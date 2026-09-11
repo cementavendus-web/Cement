@@ -1,0 +1,200 @@
+# ---------------------------------------------------------------------------
+# Tracked investor registry.
+#
+# `aliases` are matched case-insensitively on word boundaries. `marquee: true`
+# adds a bonus to the opportunity score, because a sell-down by one of these
+# names is materially more likely to translate into a tradeable block.
+#
+# Entities not listed here are still captured: the extractor falls back to
+# spaCy ORG entities filtered by the `generic_suffixes` heuristics below.
+# ---------------------------------------------------------------------------
+version: 2
+
+investors:
+  - name: Blackstone
+    type: PE
+    country: US
+    marquee: true
+    aliases: [blackstone, "blackstone group", "bcp topco", "blackstone capital partners"]
+  - name: KKR
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["kkr", "kohlberg kravis roberts", "kkr india", "copthall mauritius"]
+  - name: Bain Capital
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["bain capital", "bc investments", "bain capital india"]
+  - name: TPG
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["tpg", "tpg capital", "tpg growth", "newquest"]
+  - name: Warburg Pincus
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["warburg pincus", "warburg", "plutus wealth"]
+  - name: Carlyle
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["carlyle", "the carlyle group", "cA fortune investments"]
+  - name: General Atlantic
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["general atlantic", "ga global", "ga growth"]
+  - name: Temasek
+    type: Sovereign
+    country: SG
+    marquee: true
+    aliases: [temasek, "camas investments", "dunearn investments"]
+  - name: GIC
+    type: Sovereign
+    country: SG
+    marquee: true
+    aliases: ["gic", "gic private limited", "caladium investment"]
+  - name: ADIA
+    type: Sovereign
+    country: AE
+    marquee: true
+    aliases: ["adia", "abu dhabi investment authority", "platinum jasmine"]
+  - name: CPPIB
+    type: Pension
+    country: CA
+    marquee: true
+    aliases: ["cppib", "cpp investments", "canada pension plan investment board"]
+  - name: Apax
+    type: PE
+    country: UK
+    marquee: true
+    aliases: ["apax", "apax partners", "apax global"]
+  - name: ChrysCapital
+    type: PE
+    country: IN
+    marquee: true
+    aliases: ["chryscapital", "chrys capital"]
+  - name: Sequoia / Peak XV
+    type: VC
+    country: IN
+    marquee: true
+    aliases: ["sequoia capital", "peak xv", "peak xv partners", "sca growth"]
+  - name: SoftBank
+    type: VC
+    country: JP
+    marquee: true
+    aliases: ["softbank", "svf", "svf india", "softbank vision fund"]
+  - name: Tiger Global
+    type: VC
+    country: US
+    marquee: true
+    aliases: ["tiger global", "internet fund iii", "internet fund iv"]
+  - name: Accel
+    type: VC
+    country: US
+    marquee: false
+    aliases: ["accel india", "accel growth"]
+  - name: Advent International
+    type: PE
+    country: US
+    marquee: true
+    aliases: ["advent international", "advent", "ai lightning"]
+  - name: Baring PE Asia / EQT
+    type: PE
+    country: HK
+    marquee: true
+    aliases: ["baring private equity asia", "bpea", "eqt", "bpea eqt"]
+  - name: Multiples Alternate Asset Management
+    type: PE
+    country: IN
+    marquee: false
+    aliases: ["multiples alternate", "multiples private equity"]
+  - name: Norwest Venture Partners
+    type: VC
+    country: US
+    marquee: false
+    aliases: ["norwest venture", "norwest india"]
+  - name: Kedaara Capital
+    type: PE
+    country: IN
+    marquee: false
+    aliases: ["kedaara", "kedaara capital"]
+  - name: LIC
+    type: Insurance
+    country: IN
+    marquee: true
+    aliases: ["life insurance corporation", "lic of india"]
+  - name: SBI Mutual Fund
+    type: MutualFund
+    country: IN
+    marquee: false
+    aliases: ["sbi mutual fund", "sbi funds management"]
+  - name: HDFC Mutual Fund
+    type: MutualFund
+    country: IN
+    marquee: false
+    aliases: ["hdfc mutual fund", "hdfc asset management"]
+  - name: ICICI Prudential MF
+    type: MutualFund
+    country: IN
+    marquee: false
+    aliases: ["icici prudential mutual fund", "icici prudential asset management"]
+  - name: Nomura
+    type: Institutional
+    country: JP
+    marquee: false
+    aliases: ["nomura", "nomura singapore"]
+  - name: Morgan Stanley
+    type: Institutional
+    country: US
+    marquee: false
+    aliases: ["morgan stanley", "morgan stanley asia"]
+  - name: Goldman Sachs
+    type: Institutional
+    country: US
+    marquee: false
+    aliases: ["goldman sachs", "goldman sachs investments mauritius"]
+  - name: Premji Invest
+    type: FamilyOffice
+    country: IN
+    marquee: true
+    aliases: ["premji invest", "premjiinvest", "pi opportunities"]
+  - name: Amansa
+    type: FamilyOffice
+    country: SG
+    marquee: false
+    aliases: ["amansa", "amansa holdings"]
+
+# Heuristics for harvesting untracked institutional entities from free text.
+discovery:
+  # An ORG mention is promoted to a candidate investor when it ends with one of
+  # these and sits within the configured window of a sell/buy verb.
+  generic_suffixes:
+    - capital
+    - partners
+    - fund
+    - funds
+    - holdings
+    - investments
+    - ventures
+    - advisors
+    - asset management
+    - mutual fund
+    - trust
+    - pte ltd
+    - pte. ltd.
+    - mauritius
+    - llp
+  # Words that disqualify a candidate (exchanges, regulators, intermediaries).
+  stoplist:
+    - bse limited
+    - national stock exchange
+    - securities and exchange board of india
+    - sebi
+    - registrar
+    - depository
+    - national securities depository
+    - central depository services
+    - stock exchange

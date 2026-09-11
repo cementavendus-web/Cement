@@ -1,0 +1,31 @@
+# --- core (required) -------------------------------------------------------
+requests>=2.31,<3
+beautifulsoup4>=4.12,<5
+lxml>=5.1,<6
+pandas>=2.1,<3
+SQLAlchemy>=2.0,<3
+psycopg2-binary>=2.9,<3
+PyYAML>=6.0,<7
+
+# --- PDF processing --------------------------------------------------------
+pdfplumber>=0.10,<1
+PyMuPDF>=1.23,<2
+pytesseract>=0.3.10,<1        # needs the tesseract-ocr binary (see Dockerfile)
+Pillow>=10.2,<12
+
+# --- NLP -------------------------------------------------------------------
+spacy>=3.7,<4
+# Model is installed separately:
+#   python -m spacy download en_core_web_sm
+scikit-learn>=1.4,<2          # optional ML classifier layer
+joblib>=1.3,<2
+
+# --- scraping fallback -----------------------------------------------------
+playwright>=1.42,<2           # then: playwright install --with-deps chromium
+
+# --- scheduling ------------------------------------------------------------
+APScheduler>=3.10,<4
+
+# --- tests -----------------------------------------------------------------
+pytest>=8.0,<9
+pytest-cov>=4.1,<7
