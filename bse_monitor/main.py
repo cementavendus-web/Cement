@@ -180,6 +180,53 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_llm(args: argparse.Namespace) -> int:
+    """Inspect, dry-run or report on the LLM extraction layer."""
+    config = bootstrap(args)
+    from .llm.client import ANTHROPIC_AVAILABLE, client_from_config
+    from .llm.extractor import page_text_for
+
+    client = client_from_config(config)
+
+    if args.action == "status":
+        print(json.dumps({
+            "enabled": bool(config.get("llm.enabled", False)),
+            "sdk_installed": ANTHROPIC_AVAILABLE,
+            "client_available": bool(client and client.available),
+            "model": config.get("llm.model"),
+            "prompt_version": config.get("llm.prompt_version"),
+            "max_calls_per_run": config.get("llm.max_calls_per_run"),
+        }, indent=2))
+        return 0
+
+    if args.action == "dry-run":
+        # Render the exact request without sending it — the cheapest way to
+        # eyeball prompt-cache stability.
+        from .llm.client import LlmClient
+
+        probe = client or LlmClient(model=config.get("llm.model", "claude-haiku-4-5"))
+        text, slice_label = page_text_for({}, args.text or "sample filing text")
+        params = probe.build_params(
+            title=args.title or "Sample filing", page_text=text, page_slice=slice_label
+        )
+        system_chars = sum(len(block["text"]) for block in params["system"])
+        print(json.dumps({
+            "model": params["model"],
+            "system_blocks": len(params["system"]),
+            "system_chars": system_chars,
+            "system_approx_tokens": int(system_chars / 3.6),
+            "cache_control_present": all("cache_control" in b for b in params["system"]),
+            "user_content_preview": params["messages"][0]["content"][:400],
+        }, indent=2))
+        return 0
+
+    with session_scope() as session:
+        print(json.dumps(
+            repo.llm_usage_summary(session, _parse_date(args.since)), indent=2
+        ))
+    return 0
+
+
 def cmd_calendar(args: argparse.Namespace) -> int:
     """Refresh, list or expire the forward deadline calendar."""
     config = bootstrap(args)
@@ -451,6 +498,13 @@ def build_parser() -> argparse.ArgumentParser:
     schedule = sub.add_parser("schedule", help="run the scheduler")
     schedule.add_argument("--print-cron", action="store_true")
     schedule.set_defaults(func=cmd_schedule)
+
+    llm = sub.add_parser("llm", help="LLM extraction layer")
+    llm.add_argument("action", choices=["status", "dry-run", "cost"])
+    llm.add_argument("--title", help="dry-run: filing title")
+    llm.add_argument("--text", help="dry-run: filing body")
+    llm.add_argument("--since", help="cost: YYYY-MM-DD")
+    llm.set_defaults(func=cmd_llm)
 
     seed = sub.add_parser("seed-demo", help="load bundled sample filings")
     seed.add_argument("--file", help="path to a filings JSON file")

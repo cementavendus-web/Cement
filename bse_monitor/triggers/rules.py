@@ -22,7 +22,7 @@ import hashlib
 import re
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
-from .dates import add_days, add_hours, add_months, add_years
+from .dates import add_days, add_hours, add_months
 
 RULE_VERSION = "v1"
 

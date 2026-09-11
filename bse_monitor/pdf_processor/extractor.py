@@ -57,10 +57,21 @@ class ExtractionOutput:
     ocr_used: bool = False
     tables: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
     error: Optional[str] = None
+    # Per-page text. The engines already build this list internally, so keeping
+    # it costs nothing and makes an exact first-N-pages slice possible without a
+    # second parse — which is what the LLM layer needs.
+    pages: List[str] = dataclasses.field(default_factory=list)
+    pages_extracted: int = 0
 
     @property
     def char_count(self) -> int:
         return len(self.text)
+
+    def first_pages(self, n: int) -> str:
+        """Text of the first ``n`` pages, or the whole text if pages are absent."""
+        if self.pages:
+            return "\n".join(self.pages[:n]).strip()
+        return self.text
 
 
 class PdfExtractor:
@@ -83,15 +94,16 @@ class PdfExtractor:
         self.extract_tables = extract_tables
 
     # -- engines -----------------------------------------------------------
-    def _with_pdfplumber(self, path: Path) -> ExtractionOutput:
+    def _with_pdfplumber(self, path: Path, *, limit: Optional[int] = None) -> ExtractionOutput:
         if not PDFPLUMBER_AVAILABLE:
             return ExtractionOutput(method="none", error="pdfplumber not installed")
+        cap = limit or self.max_pages_text
         try:
             chunks: List[str] = []
             tables: List[Dict[str, Any]] = []
             with pdfplumber.open(str(path)) as pdf:
                 total_pages = len(pdf.pages)
-                for index, page in enumerate(pdf.pages[: self.max_pages_text]):
+                for index, page in enumerate(pdf.pages[:cap]):
                     chunks.append(page.extract_text() or "")
                     if self.extract_tables:
                         for table in page.extract_tables() or []:
@@ -107,30 +119,37 @@ class PdfExtractor:
                 method="pdfplumber",
                 page_count=total_pages,
                 tables=tables,
+                pages=chunks,
+                pages_extracted=len(chunks),
             )
         except Exception as exc:
             log.warning("pdfplumber failed", extra={"path": str(path), "error": str(exc)})
             return ExtractionOutput(method="none", error=f"pdfplumber: {exc}")
 
-    def _with_pymupdf(self, path: Path) -> ExtractionOutput:
+    def _with_pymupdf(self, path: Path, *, limit: Optional[int] = None) -> ExtractionOutput:
         if not PYMUPDF_AVAILABLE:
             return ExtractionOutput(method="none", error="pymupdf not installed")
+        cap = limit or self.max_pages_text
         try:
             document = fitz.open(str(path))
             chunks = [
                 document.load_page(i).get_text("text")
-                for i in range(min(document.page_count, self.max_pages_text))
+                for i in range(min(document.page_count, cap))
             ]
             page_count = document.page_count
             document.close()
             return ExtractionOutput(
-                text="\n".join(chunks).strip(), method="pymupdf", page_count=page_count
+                text="\n".join(chunks).strip(),
+                method="pymupdf",
+                page_count=page_count,
+                pages=chunks,
+                pages_extracted=len(chunks),
             )
         except Exception as exc:
             log.warning("pymupdf failed", extra={"path": str(path), "error": str(exc)})
             return ExtractionOutput(method="none", error=f"pymupdf: {exc}")
 
-    def _with_ocr(self, path: Path) -> ExtractionOutput:
+    def _with_ocr(self, path: Path, *, limit: Optional[int] = None) -> ExtractionOutput:
         """Rasterise via PyMuPDF, then Tesseract each page image."""
         if not (TESSERACT_AVAILABLE and PYMUPDF_AVAILABLE):
             missing = "pytesseract/Pillow" if PYMUPDF_AVAILABLE else "PyMuPDF"
@@ -142,7 +161,8 @@ class PdfExtractor:
             zoom = self.ocr_dpi / 72.0
             matrix = fitz.Matrix(zoom, zoom)
             chunks: List[str] = []
-            for index in range(min(document.page_count, self.ocr_max_pages)):
+            cap = min(document.page_count, limit or self.ocr_max_pages, self.ocr_max_pages)
+            for index in range(cap):
                 pixmap = document.load_page(index).get_pixmap(matrix=matrix)
                 image = Image.open(io.BytesIO(pixmap.tobytes("png")))
                 chunks.append(pytesseract.image_to_string(image, lang=self.ocr_language))
@@ -153,37 +173,52 @@ class PdfExtractor:
                 method="ocr",
                 page_count=page_count,
                 ocr_used=True,
+                pages=chunks,
+                pages_extracted=len(chunks),
             )
         except Exception as exc:
             log.warning("OCR failed", extra={"path": str(path), "error": str(exc)})
             return ExtractionOutput(method="none", error=f"ocr: {exc}")
 
     # -- orchestration -----------------------------------------------------
-    def _is_thin(self, output: ExtractionOutput) -> bool:
-        """True when the text layer is too sparse to be a real one."""
-        pages = max(1, min(output.page_count or 1, self.max_pages_text))
+    def _is_thin(self, output: ExtractionOutput, limit: Optional[int] = None) -> bool:
+        """True when the text layer is too sparse to be a real one.
+
+        The denominator must follow the *effective* page limit: judging a
+        3-page slice of a 60-page document against 60 pages would call a
+        perfectly good text layer thin and needlessly escalate to a 12-page
+        OCR run — slow, and wrong.
+        """
+        cap = limit or self.max_pages_text
+        pages = max(1, min(output.page_count or 1, cap))
         return (output.char_count / pages) < self.ocr_trigger
 
-    def extract(self, path: str | Path) -> ExtractionOutput:
+    def extract(self, path: str | Path, max_pages: Optional[int] = None) -> ExtractionOutput:
+        """Extract text, optionally capping at the first ``max_pages`` pages.
+
+        ``max_pages=None`` keeps the instance default, so every existing caller
+        is unaffected.
+        """
         pdf_path = Path(path)
         if not pdf_path.exists():
             return ExtractionOutput(method="none", error="file not found")
 
-        best = self._with_pdfplumber(pdf_path)
+        limit = max_pages or self.max_pages_text
+        best = self._with_pdfplumber(pdf_path, limit=limit)
 
-        if not best.text or self._is_thin(best):
-            alternative = self._with_pymupdf(pdf_path)
+        if not best.text or self._is_thin(best, limit):
+            alternative = self._with_pymupdf(pdf_path, limit=limit)
             if alternative.char_count > best.char_count:
                 # Keep pdfplumber's tables; only the text was inferior.
                 alternative.tables = best.tables
                 best = alternative
 
-        if self.ocr_enabled and (not best.text or self._is_thin(best)):
+        if self.ocr_enabled and (not best.text or self._is_thin(best, limit)):
             log.info(
                 "Text layer thin, escalating to OCR",
                 extra={"path": str(pdf_path), "chars": best.char_count, "pages": best.page_count},
             )
-            ocr_output = self._with_ocr(pdf_path)
+            ocr_output = self._with_ocr(pdf_path, limit=limit)
             if ocr_output.char_count > best.char_count:
                 ocr_output.tables = best.tables
                 ocr_output.page_count = ocr_output.page_count or best.page_count

@@ -122,3 +122,95 @@ def calendar_filing(session):
     )
     session.commit()
     return company, filing
+
+
+class FakeMessages:
+    """Recording stand-in for ``client.messages``.
+
+    Injected via ``LlmClient(client=fake)``, so the tests exercise the real
+    request-construction and parsing code with no HTTP and no SDK installed.
+    """
+
+    def __init__(self, responses=None, error=None):
+        self._responses = list(responses or [])
+        self._error = error
+        self.calls = []
+        self.batches = FakeBatches()
+
+    # Only `create` exists, so LlmClient falls through from `parse` to the
+    # output_config path — the same branch an older SDK would take.
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        if self._error is not None:
+            error = self._error
+            if isinstance(error, list):
+                error = error.pop(0) if error else None
+                if error is None:
+                    self._error = None
+            if error is not None:
+                raise error
+        if self._responses:
+            return self._responses.pop(0)
+        return make_response({"event_class": "Other", "holder": None,
+                              "holder_type": "UNKNOWN", "stake_pct": None,
+                              "effective_date": None, "confidence": 0.5})
+
+
+class FakeBatches:
+    def __init__(self):
+        self.submitted = []
+        self.results_payload = []
+
+    def create(self, requests):
+        self.submitted.append(requests)
+        return type("Batch", (), {"id": "msgbatch_test", "processing_status": "in_progress"})()
+
+    def retrieve(self, batch_id):
+        return type("Batch", (), {"id": batch_id, "processing_status": "ended"})()
+
+    def results(self, batch_id):
+        return iter(self.results_payload)
+
+
+class FakeClient:
+    def __init__(self, responses=None, error=None):
+        self.messages = FakeMessages(responses, error)
+
+
+def make_response(payload, *, usage=None, text=None):
+    """A minimal object shaped like a Messages API response."""
+    import json as _json
+
+    class Usage:
+        input_tokens = (usage or {}).get("input_tokens", 3000)
+        output_tokens = (usage or {}).get("output_tokens", 120)
+        cache_creation_input_tokens = (usage or {}).get("cache_creation_input_tokens", 0)
+        cache_read_input_tokens = (usage or {}).get("cache_read_input_tokens", 0)
+
+    class Block:
+        type = "text"
+
+    block = Block()
+    block.text = text if text is not None else _json.dumps(payload)
+
+    class Response:
+        content = [block]
+
+    response = Response()
+    response.usage = Usage()
+    return response
+
+
+@pytest.fixture()
+def fake_anthropic():
+    return FakeClient
+
+
+@pytest.fixture()
+def llm_verdict():
+    from bse_monitor.llm.schema import LlmVerdict
+
+    return LlmVerdict(
+        event_class="OFS", holder="Blackstone", holder_type="PE_VC",
+        stake_pct=6.2, effective_date=dt.date(2026, 9, 15), confidence=0.91,
+    )

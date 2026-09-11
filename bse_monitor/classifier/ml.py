@@ -146,10 +146,14 @@ def blend(
     ml_prediction: Optional[Tuple[str, float]],
     rule_floor: float = 0.5,
     ml_override_threshold: float = 0.75,
+    *,
+    model_label: str = "ml",
 ) -> Tuple[str, float, str]:
     """Combine rule and model verdicts.
 
-    Returns ``(category, confidence, method)``.
+    Returns ``(category, confidence, method)``. ``model_label`` names the second
+    opinion in the returned method string, so the same arbitration serves both
+    the local ML model and the LLM without a second implementation.
 
     * The rules win outright whenever they were confident (``>= rule_floor``);
       at most the model nudges confidence up when it agrees.
@@ -163,13 +167,21 @@ def blend(
 
     if rule_confidence >= rule_floor:
         if ml_category == rule_category:
-            return rule_category, min(1.0, round((rule_confidence + ml_confidence) / 2 + 0.1, 4)), "rules+ml"
+            return (
+                rule_category,
+                min(1.0, round((rule_confidence + ml_confidence) / 2 + 0.1, 4)),
+                f"rules+{model_label}",
+            )
         return rule_category, rule_confidence, "rules"
 
     if ml_confidence >= ml_override_threshold and ml_category != rule_category:
-        return ml_category, round(ml_confidence, 4), "ml"
+        return ml_category, round(ml_confidence, 4), model_label
 
     if ml_category == rule_category:
-        return rule_category, round(max(rule_confidence, ml_confidence * 0.8), 4), "rules+ml"
+        return (
+            rule_category,
+            round(max(rule_confidence, ml_confidence * 0.8), 4),
+            f"rules+{model_label}",
+        )
 
     return rule_category, rule_confidence, "rules"

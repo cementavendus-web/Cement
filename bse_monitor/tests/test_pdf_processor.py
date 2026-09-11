@@ -94,14 +94,14 @@ def test_thin_text_layer_triggers_ocr_escalation(tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(
         extractor, "_with_pdfplumber",
-        lambda _p: ExtractionOutput(text="sig", method="pdfplumber", page_count=4),
+        lambda _p, **_k: ExtractionOutput(text="sig", method="pdfplumber", page_count=4),
     )
     monkeypatch.setattr(
-        extractor, "_with_pymupdf", lambda _p: ExtractionOutput(text="", method="none")
+        extractor, "_with_pymupdf", lambda _p, **_k: ExtractionOutput(text="", method="none")
     )
     monkeypatch.setattr(
         extractor, "_with_ocr",
-        lambda _p: ExtractionOutput(text="x" * 900, method="ocr", page_count=4, ocr_used=True),
+        lambda _p, **_k: ExtractionOutput(text="x" * 900, method="ocr", page_count=4, ocr_used=True),
     )
     output = extractor.extract(target)
     assert output.method == "ocr" and output.ocr_used is True
@@ -113,11 +113,11 @@ def test_ocr_is_not_used_when_the_text_layer_is_good(tmp_path, monkeypatch) -> N
     extractor = PdfExtractor(ocr_enabled=True, ocr_trigger_chars_per_page=100)
     monkeypatch.setattr(
         extractor, "_with_pdfplumber",
-        lambda _p: ExtractionOutput(text="y" * 900, method="pdfplumber", page_count=2),
+        lambda _p, **_k: ExtractionOutput(text="y" * 900, method="pdfplumber", page_count=2),
     )
     monkeypatch.setattr(
         extractor, "_with_ocr",
-        lambda _p: pytest.fail("OCR must not run on a healthy text layer"),
+        lambda _p, **_k: pytest.fail("OCR must not run on a healthy text layer"),
     )
     assert extractor.extract(target).method == "pdfplumber"
 
@@ -128,11 +128,11 @@ def test_pymupdf_rescues_a_pdfplumber_failure(tmp_path, monkeypatch) -> None:
     extractor = PdfExtractor(ocr_enabled=False)
     monkeypatch.setattr(
         extractor, "_with_pdfplumber",
-        lambda _p: ExtractionOutput(text="", method="none", error="pdfplumber: boom"),
+        lambda _p, **_k: ExtractionOutput(text="", method="none", error="pdfplumber: boom"),
     )
     monkeypatch.setattr(
         extractor, "_with_pymupdf",
-        lambda _p: ExtractionOutput(text="z" * 800, method="pymupdf", page_count=2),
+        lambda _p, **_k: ExtractionOutput(text="z" * 800, method="pymupdf", page_count=2),
     )
     assert extractor.extract(target).method == "pymupdf"
 
@@ -144,12 +144,12 @@ def test_tables_from_pdfplumber_are_preserved_through_escalation(tmp_path, monke
     tables = [{"page": 1, "rows": [["Name", "Shares"], ["A", "10"]]}]
     monkeypatch.setattr(
         extractor, "_with_pdfplumber",
-        lambda _p: ExtractionOutput(text="tiny", method="pdfplumber", page_count=3, tables=tables),
+        lambda _p, **_k: ExtractionOutput(text="tiny", method="pdfplumber", page_count=3, tables=tables),
     )
-    monkeypatch.setattr(extractor, "_with_pymupdf", lambda _p: ExtractionOutput(method="none"))
+    monkeypatch.setattr(extractor, "_with_pymupdf", lambda _p, **_k: ExtractionOutput(method="none"))
     monkeypatch.setattr(
         extractor, "_with_ocr",
-        lambda _p: ExtractionOutput(text="q" * 900, method="ocr", page_count=3, ocr_used=True),
+        lambda _p, **_k: ExtractionOutput(text="q" * 900, method="ocr", page_count=3, ocr_used=True),
     )
     output = extractor.extract(target)
     assert output.method == "ocr" and output.tables == tables
@@ -183,3 +183,37 @@ def test_summarise_aggregates() -> None:
     stats = summarise(parse_tables([ALLOTMENT_TABLE]))
     assert stats["total_shares"] == pytest.approx(20_000_000)
     assert stats["max_percent"] == pytest.approx(4.2)
+
+
+# -- per-call page limit (Layer 2 needs the first 3 pages only) -------------
+def test_extract_signature_is_backward_compatible(tmp_path, monkeypatch) -> None:
+    """Existing callers pass a path only; that must keep working."""
+    target = tmp_path / "a.pdf"
+    target.write_bytes(PDF_BYTES)
+    extractor = PdfExtractor(ocr_enabled=False)
+    monkeypatch.setattr(
+        extractor, "_with_pdfplumber",
+        lambda _p, **_k: ExtractionOutput(text="y" * 500, method="pdfplumber", page_count=2),
+    )
+    assert extractor.extract(target).method == "pdfplumber"
+
+
+def test_is_thin_measures_against_the_requested_pages(tmp_path, monkeypatch) -> None:
+    """A 3-page slice of a 60-page document must not be judged against 60 pages.
+
+    Getting this wrong calls a perfectly good text layer thin and escalates to a
+    12-page OCR run — slow, and wrong.
+    """
+    target = tmp_path / "long.pdf"
+    target.write_bytes(PDF_BYTES)
+    extractor = PdfExtractor(ocr_enabled=True, ocr_trigger_chars_per_page=100, max_pages_text=60)
+    # 900 chars over 3 requested pages = 300/page: healthy. Over 60 pages: "thin".
+    output = ExtractionOutput(text="z" * 900, method="pdfplumber", page_count=60)
+    assert extractor._is_thin(output) is True          # against the instance default
+    assert extractor._is_thin(output, 3) is False      # against what was asked for
+
+
+def test_pages_are_populated_for_slicing() -> None:
+    output = ExtractionOutput(text="a\nb\nc\nd", pages=["a", "b", "c", "d"], page_count=4)
+    assert output.first_pages(3) == "a\nb\nc"
+    assert ExtractionOutput(text="joined only").first_pages(3) == "joined only"

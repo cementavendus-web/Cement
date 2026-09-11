@@ -34,6 +34,12 @@ from .classifier.ml import MLClassifier, blend
 from .classifier.rules import RuleClassifier
 from .classifier.scoring import OpportunityScorer, ScoreInput, scorer_from_config
 from .config import Config, load_investors
+from .llm.client import client_from_config as llm_client_from_config
+from .llm.extractor import LlmEventExtractor, page_text_for
+from .llm.reconcile import (
+    merge_verdict_into_extraction,
+    reconcile_three_way,
+)
 from .database import repository as repo
 from .database.models import EventFiling
 from .parser.entities import ExtractionResult, InvestorMatcher, extract_all
@@ -64,6 +70,10 @@ class RunStats:
     pdfs_failed: int = 0
     alerts_queued: int = 0
     alerts_sent: int = 0
+    llm_calls: int = 0
+    llm_cached: int = 0
+    llm_failed: int = 0
+    llm_cost_usd: float = 0.0
     triggers_created: int = 0
     triggers_updated: int = 0
     errors: List[str] = field(default_factory=list)
@@ -79,6 +89,10 @@ class RunStats:
             "pdfs_failed": self.pdfs_failed,
             "alerts_queued": self.alerts_queued,
             "alerts_sent": self.alerts_sent,
+            "llm_calls": self.llm_calls,
+            "llm_cached": self.llm_cached,
+            "llm_failed": self.llm_failed,
+            "llm_cost_usd": round(self.llm_cost_usd, 6),
             "triggers_created": self.triggers_created,
             "triggers_updated": self.triggers_updated,
             "errors": self.errors[:20],
@@ -100,6 +114,25 @@ class MonitorPipeline:
             self.ml = candidate if candidate.available else None
             if self.ml is None:
                 log.warning("ML model requested but unavailable; running rules-only")
+
+        self.llm: Optional[LlmEventExtractor] = None
+        if config.get("llm.enabled", False):
+            candidate = llm_client_from_config(config)
+            if candidate is not None and candidate.available:
+                self.llm = LlmEventExtractor(
+                    candidate,
+                    prompt_version=str(config.get("llm.prompt_version", "v1")),
+                    max_calls_per_run=int(config.get("llm.max_calls_per_run", 200)),
+                    min_priority=str(config.get("llm.min_priority", "MEDIUM")),
+                    send_unclassified=bool(config.get("llm.send_unclassified", True)),
+                    persist_raw=bool(config.get("llm.persist_raw_response", True)),
+                )
+            else:
+                log.warning("LLM extraction requested but unavailable; running rules-only")
+        self.llm_rule_floor = float(config.get("llm.rule_floor", 0.5))
+        self.llm_override_threshold = float(config.get("llm.override_threshold", 0.75))
+        self.llm_max_pages = int(config.get("llm.max_pages", 3))
+        self.llm_max_chars = int(config.get("llm.max_chars", 12000))
 
         self.pdf_enabled = bool(config.get("pdf.enabled", True))
         self.pdf_extractor: Optional[PdfExtractor] = (
@@ -180,15 +213,24 @@ class MonitorPipeline:
 
         classification = self.rule_classifier.classify(search_text, self.min_confidence)
         category, confidence, method = classification.category, classification.confidence, classification.method
-        if self.ml is not None:
+        ml_prediction = self.ml.predict(search_text) if self.ml is not None else None
+        if ml_prediction is not None:
             category, confidence, method = blend(
-                classification.category, classification.confidence, self.ml.predict(search_text)
+                classification.category, classification.confidence, ml_prediction
             )
 
         extraction = extract_all(
             search_text, matcher=self.matcher, nlp=self.nlp, discover_investors=True
         )
         extraction = self._merge_table_signals(extraction, document_meta)
+
+        # The LLM pass needs a persisted filing to key its dedupe row against, so
+        # it runs after the first upsert; see _run_llm below.
+        llm_evidence: Dict[str, Any] = {}
+        pending_llm = (
+            self.llm is not None
+            and self.llm.available
+        )
 
         score_result = self.scorer.score(
             ScoreInput(
@@ -234,6 +276,42 @@ class MonitorPipeline:
                 "scrape_run_id": run_id,
             },
         )
+
+        if pending_llm:
+            verdict = self._run_llm(session, filing, raw, document_meta, search_text, stats)
+            if verdict is not None:
+                category, confidence, method, llm_evidence = reconcile_three_way(
+                    classification.category,
+                    classification.confidence,
+                    ml_prediction,
+                    verdict,
+                    rule_floor=self.llm_rule_floor,
+                    override_threshold=self.llm_override_threshold,
+                )
+                extraction = merge_verdict_into_extraction(extraction, verdict)
+                score_result = self.scorer.score(
+                    ScoreInput(
+                        category=category,
+                        confidence=confidence,
+                        certainty=classification.certainty,
+                        amount_inr=extraction.amount_inr,
+                        percent_of_equity=extraction.percent_of_equity,
+                        marquee_investor=extraction.marquee_investor,
+                        promoter_involved=extraction.promoter_involved,
+                        lock_in_expiry_date=extraction.lock_in_expiry_date,
+                        filing_date=raw.filing_date,
+                    )
+                )
+                evidence = dict(classification.evidence)
+                evidence["llm"] = llm_evidence
+                filing.category = category
+                filing.classification_confidence = confidence
+                filing.classification_method = method
+                filing.classification_evidence = evidence
+                filing.opportunity_score = score_result.score
+                filing.score_breakdown = score_result.breakdown
+                filing.priority = score_result.priority
+                session.flush()
 
         if document_meta:
             repo.upsert_document(session, filing.id, document_meta.pop("url"), **document_meta)
@@ -415,6 +493,43 @@ class MonitorPipeline:
                 }
             ],
         )
+
+    def _run_llm(
+        self,
+        session: Session,
+        filing: EventFiling,
+        raw: RawFiling,
+        document_meta: Dict[str, Any],
+        search_text: str,
+        stats: RunStats,
+    ) -> Any:
+        """Rule-prefiltered LLM pass. Never fatal."""
+        assert self.llm is not None
+        if not self.llm.should_extract(filing):
+            return None
+        try:
+            page_text, page_slice = page_text_for(
+                document_meta,
+                search_text,
+                max_pages=self.llm_max_pages,
+                max_chars=self.llm_max_chars,
+            )
+            verdict = self.llm.extract(
+                session,
+                filing,
+                title=raw.headline or filing.headline or "",
+                page_text=page_text,
+                page_slice=page_slice,
+            )
+        except Exception as exc:
+            stats.errors.append(f"llm:{filing.id}:{exc}")
+            log.exception("LLM extraction failed", extra={"filing_id": filing.id})
+            return None
+        stats.llm_calls = self.llm.stats.calls
+        stats.llm_cached = self.llm.stats.cached
+        stats.llm_failed = self.llm.stats.failed
+        stats.llm_cost_usd = self.llm.stats.cost_usd
+        return verdict
 
     def _refresh_calendar(
         self,
