@@ -21,6 +21,8 @@ from .models import (
     AuditLog,
     Company,
     DailyAlert,
+    DailyQuote,
+    Disposal,
     EventFiling,
     FilingDocument,
     FilingInvestor,
@@ -124,6 +126,17 @@ def upsert_company(
 # --------------------------------------------------------------------------
 # Filings
 # --------------------------------------------------------------------------
+def company_by_code(session: Session, code: str) -> Optional[Company]:
+    """Resolve a scrip code or NSE symbol to a tracked company."""
+    if not code:
+        return None
+    return session.scalar(
+        select(Company).where(
+            (Company.bse_code == code) | (Company.nse_symbol == code)
+        ).limit(1)
+    )
+
+
 def find_filing(session: Session, *, content_hash_value: str) -> Optional[EventFiling]:
     return session.scalar(
         select(EventFiling).where(EventFiling.content_hash == content_hash_value)
@@ -429,6 +442,8 @@ def counts(session: Session) -> Dict[str, int]:
         "alerts": session.scalar(select(func.count()).select_from(DailyAlert)) or 0,
         "triggers": session.scalar(select(func.count()).select_from(UpcomingTrigger)) or 0,
         "llm_extractions": session.scalar(select(func.count()).select_from(LlmExtraction)) or 0,
+        "disposals": session.scalar(select(func.count()).select_from(Disposal)) or 0,
+        "quotes": session.scalar(select(func.count()).select_from(DailyQuote)) or 0,
     }
 
 
@@ -706,3 +721,106 @@ def llm_usage_summary(session: Session, since: Optional[dt.date] = None) -> Dict
         "cache_hit_rate": round(reads / (reads + inputs), 4) if (reads + inputs) else 0.0,
         "cost_usd": round(float(sum(float(r.cost_usd or 0) for r in rows)), 4),
     }
+
+
+# --------------------------------------------------------------------------
+# Disposals (label spine) and quotes
+# --------------------------------------------------------------------------
+def disposal_dedupe_key(
+    company_id: int,
+    holder_key: str,
+    trade_date: dt.date,
+    side: str,
+    quantity: Optional[float],
+) -> str:
+    """Identity for one trade, independent of which source reported it.
+
+    The same block deal is published by both exchanges and may be filed again as
+    a SAST disclosure. Keying on the economics rather than the source is what
+    stops one sale being counted three times and inflating every label.
+    """
+    qty = f"{float(quantity):.0f}" if quantity else ""
+    parts = [str(company_id), holder_key, trade_date.isoformat(), side, qty]
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()
+
+
+def upsert_disposal(session: Session, payload: Dict[str, Any]) -> tuple[Disposal, bool]:
+    key = payload["dedupe_key"]
+    row = session.scalar(select(Disposal).where(Disposal.dedupe_key == key))
+    created = row is None
+    if row is None:
+        row = Disposal(dedupe_key=key)
+        session.add(row)
+    for field, value in payload.items():
+        if field != "dedupe_key" and hasattr(row, field) and value is not None:
+            setattr(row, field, value)
+    session.flush()
+    return row, created
+
+
+def disposals_between(
+    session: Session,
+    *,
+    company_id: Optional[int] = None,
+    holder_key: Optional[str] = None,
+    start: Optional[dt.date] = None,
+    end: Optional[dt.date] = None,
+    side: str = "SELL",
+) -> list[Disposal]:
+    stmt = select(Disposal).where(Disposal.side == side)
+    if company_id is not None:
+        stmt = stmt.where(Disposal.company_id == company_id)
+    if holder_key:
+        stmt = stmt.where(Disposal.holder_key == holder_key)
+    if start:
+        stmt = stmt.where(Disposal.trade_date >= start)
+    if end:
+        stmt = stmt.where(Disposal.trade_date <= end)
+    return list(session.scalars(stmt.order_by(Disposal.trade_date)))
+
+
+def upsert_quote(session: Session, payload: Dict[str, Any]) -> tuple[DailyQuote, bool]:
+    row = session.scalar(
+        select(DailyQuote).where(
+            DailyQuote.company_id == payload["company_id"],
+            DailyQuote.trade_date == payload["trade_date"],
+            DailyQuote.exchange == payload.get("exchange", "BSE"),
+        )
+    )
+    created = row is None
+    if row is None:
+        row = DailyQuote(**payload)
+        session.add(row)
+    else:
+        for field, value in payload.items():
+            if hasattr(row, field) and value is not None:
+                setattr(row, field, value)
+    session.flush()
+    return row, created
+
+
+def latest_quote(
+    session: Session, company_id: int, as_of: Optional[dt.date] = None
+) -> Optional[DailyQuote]:
+    """Most recent quote strictly at or before ``as_of`` — never after."""
+    stmt = select(DailyQuote).where(DailyQuote.company_id == company_id)
+    if as_of:
+        stmt = stmt.where(DailyQuote.trade_date <= as_of)
+    return session.scalar(stmt.order_by(DailyQuote.trade_date.desc()).limit(1))
+
+
+def average_daily_volume(
+    session: Session, company_id: int, as_of: dt.date, window_days: int = 30
+) -> Optional[float]:
+    start = as_of - dt.timedelta(days=window_days)
+    rows = list(
+        session.scalars(
+            select(DailyQuote).where(
+                DailyQuote.company_id == company_id,
+                DailyQuote.trade_date > start,
+                DailyQuote.trade_date <= as_of,
+            )
+        )
+    )
+    volumes = [float(r.volume) for r in rows if r.volume]
+    return sum(volumes) / len(volumes) if volumes else None

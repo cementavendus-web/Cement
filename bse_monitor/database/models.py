@@ -80,6 +80,9 @@ TRIGGER_STATUSES = ("PENDING", "FIRED", "SUPERSEDED", "CANCELLED")
 ANCHOR_BASES = ("ALLOTMENT", "LISTING", "RESOLUTION", "RESULTS_DECLARED", "FILING", "WATCHLIST")
 SUBJECT_TYPES = ("ANCHOR_INVESTOR", "PREIPO_SHAREHOLDER", "PROMOTER", "COMPANY", "UNKNOWN")
 
+DEAL_SOURCES = ("NSE_BULK", "NSE_BLOCK", "BSE_BULK", "BSE_BLOCK", "SAST", "OFS", "QIP", "MANUAL")
+DEAL_SIDES = ("BUY", "SELL")
+
 LLM_MODES = ("SYNC", "BATCH")
 LLM_STATUSES = ("PENDING", "SUBMITTED", "OK", "FAILED", "SKIPPED")
 
@@ -557,6 +560,82 @@ class LlmExtraction(Base, TimestampMixin):
         return f"<LlmExtraction {self.announcement_id} {self.status}>"
 
 
+class Disposal(Base, TimestampMixin):
+    """One observed trade by one holder in one company.
+
+    The label spine. Rows arrive from several sources that all report the same
+    trade — both exchanges publish a block deal, and the seller may also file a
+    SAST 29(2) disclosure — so ``dedupe_key`` collapses them on
+    (company, holder, date, side, quantity) rather than trusting any one source
+    to be authoritative.
+    """
+
+    __tablename__ = "disposals"
+
+    id = Column(Integer, primary_key=True)
+    company_id = Column(
+        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source = Column(String(16), nullable=False, index=True)
+    source_filing_id = Column(
+        Integer, ForeignKey("event_filings.id", ondelete="SET NULL"), index=True
+    )
+
+    holder_name = Column(String(256), nullable=False)
+    holder_key = Column(String(256), nullable=False, index=True)
+    holder_type = Column(String(32), default="UNKNOWN")
+
+    trade_date = Column(Date, nullable=False, index=True)
+    side = Column(String(8), nullable=False, default="SELL")
+    quantity = Column(Numeric(20, 2))
+    price = Column(Numeric(18, 4))
+    value_inr = Column(Numeric(20, 2))
+    percent_of_equity = Column(Float)
+
+    exchange = Column(String(8))
+    raw = Column(JSONType, default=dict)
+    dedupe_key = Column(String(64), nullable=False, unique=True, index=True)
+
+    company = relationship("Company")
+
+    __table_args__ = (
+        CheckConstraint("source IN " + str(DEAL_SOURCES), name="ck_disposal_source"),
+        CheckConstraint("side IN " + str(DEAL_SIDES), name="ck_disposal_side"),
+        Index("ix_disposals_company_holder_date", "company_id", "holder_key", "trade_date"),
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover - debug aid
+        return f"<Disposal {self.holder_key} {self.trade_date} {self.side} {self.quantity}>"
+
+
+class DailyQuote(Base):
+    """Daily close and traded volume, from the exchange bhavcopy.
+
+    Needed for two things the deal records cannot supply: the rupee value of a
+    *holding* (as opposed to a trade), and average daily volume — which drives
+    the days-of-ADV-to-liquidate feature.
+    """
+
+    __tablename__ = "daily_quotes"
+
+    id = Column(Integer, primary_key=True)
+    company_id = Column(
+        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    trade_date = Column(Date, nullable=False, index=True)
+    close_price = Column(Numeric(18, 4))
+    volume = Column(Numeric(20, 2))
+    turnover_inr = Column(Numeric(20, 2))
+    exchange = Column(String(8), default="BSE")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("company_id", "trade_date", "exchange", name="uq_quote_company_date"),
+        Index("ix_quotes_company_date", "company_id", "trade_date"),
+    )
+
+
 def utcnow() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
@@ -576,6 +655,10 @@ __all__: list[str] = [
     "AuditLog",
     "UpcomingTrigger",
     "LlmExtraction",
+    "Disposal",
+    "DailyQuote",
+    "DEAL_SOURCES",
+    "DEAL_SIDES",
     "CATEGORIES",
     "TRIGGER_TYPES",
     "TRIGGER_STATUSES",
