@@ -97,6 +97,69 @@ scoring:
   recency_max_penalty: 12
   low_confidence_penalty: 10   # applied when confidence < classifier.min_confidence
 
+triggers:
+  # Forward calendar of statutory deadlines derived from filings.
+  #
+  # Every offset is listed explicitly even where it matches the code default:
+  # env overrides are resolved by walking THIS file, so an omitted key means
+  # BSE_TRIGGERS_OFFSETS_<KEY> is silently ignored.
+  enabled: true
+  rule_version: v1
+  horizon_days: 180
+  # Reminder lead times. Override in comma form: BSE_TRIGGERS_ALERT_HORIZONS_DAYS="30,7,1"
+  alert_horizons_days: [30, 7, 1]
+  min_confidence: 0.4
+  # Feed the nearest derived deadline into the opportunity score's lock-in bonus.
+  feed_scoring: true
+  offsets:
+    anchor_lockin_short_days: 30
+    anchor_lockin_long_days: 90
+    preipo_lockin_months: 6
+    promoter_excess_lockin_months: 6
+    promoter_mpc_lockin_months: 18
+    capex_objects_short_months: 12
+    capex_objects_long_months: 36
+    mps_compliance_months: 36
+    qip_resolution_validity_days: 365
+    trading_window_reopen_hours: 48
+
+llm:
+  # Layer 2: Claude Haiku event extraction over the first pages of each filing.
+  # Disabled by default so a fresh checkout and the whole test suite stay offline.
+  enabled: false
+  model: claude-haiku-4-5
+  # Blank defers to the SDK's own ANTHROPIC_API_KEY resolution.
+  # Inject with BSE_LLM_API_KEY (works only because this key exists here).
+  api_key: ""
+  prompt_version: v1
+  max_tokens: 1024
+  max_pages: 3
+  max_chars: 12000
+  timeout_seconds: 60
+  max_retries: 3
+  backoff_base_seconds: 2.0
+  backoff_max_seconds: 30.0
+  # Rule-prefiltered gating: only filings the rule engine already finds
+  # interesting, or cannot classify, are sent.
+  max_calls_per_run: 200
+  min_priority: MEDIUM
+  send_unclassified: true
+  cache_enabled: true
+  rule_floor: 0.5
+  override_threshold: 0.75
+  persist_raw_response: true
+  batch:
+    enabled: false
+    max_requests: 1000
+    poll_seconds: 60
+    max_wait_seconds: 86400
+  pricing:
+    input_per_mtok: 1.0
+    output_per_mtok: 5.0
+    cache_write_multiplier: 1.25
+    cache_read_multiplier: 0.1
+    batch_multiplier: 0.5
+
 alerts:
   enabled: true
   high_priority_min_score: 85

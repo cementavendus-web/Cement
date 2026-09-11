@@ -44,6 +44,7 @@ from .pdf_processor.tables import parse_tables, summarise
 from .scraper.base import client_from_config
 from .scraper.bse import BSE_HEADERS, BseScraper
 from .scraper.models import RawFiling
+from .triggers.refresh import refresh_for_filing
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +64,8 @@ class RunStats:
     pdfs_failed: int = 0
     alerts_queued: int = 0
     alerts_sent: int = 0
+    triggers_created: int = 0
+    triggers_updated: int = 0
     errors: List[str] = field(default_factory=list)
 
     def as_dict(self) -> Dict[str, Any]:
@@ -76,6 +79,8 @@ class RunStats:
             "pdfs_failed": self.pdfs_failed,
             "alerts_queued": self.alerts_queued,
             "alerts_sent": self.alerts_sent,
+            "triggers_created": self.triggers_created,
+            "triggers_updated": self.triggers_updated,
             "errors": self.errors[:20],
         }
 
@@ -101,6 +106,11 @@ class MonitorPipeline:
             extractor_from_config(config) if self.pdf_enabled else None
         )
         self.min_confidence = float(config.get("classifier.min_confidence", 0.35))
+
+        self.triggers_enabled = bool(config.get("triggers.enabled", True))
+        self.trigger_offsets = dict(config.get("triggers.offsets", {}) or {})
+        self.trigger_rule_version = str(config.get("triggers.rule_version", "v1"))
+        self.triggers_feed_scoring = bool(config.get("triggers.feed_scoring", True))
 
     def _load_spacy(self) -> Any:
         """spaCy is optional; entity discovery falls back to regex without it."""
@@ -230,6 +240,7 @@ class MonitorPipeline:
 
         self._persist_entities(session, filing, company.id, extraction)
         self._persist_transaction(session, filing, company.id, category, extraction)
+        self._refresh_calendar(session, filing, extraction, search_text, stats)
 
         if created:
             stats.new += 1
@@ -404,6 +415,34 @@ class MonitorPipeline:
                 }
             ],
         )
+
+    def _refresh_calendar(
+        self,
+        session: Session,
+        filing: EventFiling,
+        extraction: ExtractionResult,
+        text: str,
+        stats: RunStats,
+    ) -> None:
+        """Derive forward deadlines. Never fatal — a calendar failure must
+        degrade the run to PARTIAL, not lose the filing that caused it."""
+        if not self.triggers_enabled:
+            return
+        try:
+            result = refresh_for_filing(
+                session,
+                filing,
+                extraction=extraction,
+                text=text,
+                offsets=self.trigger_offsets or None,
+                rule_version=self.trigger_rule_version,
+            )
+        except Exception as exc:
+            stats.errors.append(f"calendar:{filing.id}:{exc}")
+            log.exception("Calendar refresh failed", extra={"filing_id": filing.id})
+            return
+        stats.triggers_created += result.created
+        stats.triggers_updated += result.updated
 
     # ------------------------------------------------------------------
     # Run entry points

@@ -33,11 +33,14 @@ from .database.session import create_all, init_engine, session_scope
 from .logging_setup import setup_logging
 from .pipeline import MonitorPipeline
 from .reports import (
+    CALENDAR_COLUMNS,
     DAILY_COLUMNS,
+    calendar_digest,
     company_watchlist,
     daily_events,
     fund_raise_pipeline,
     sell_down_pipeline,
+    upcoming_triggers_report,
     write_csv,
 )
 from .scraper.models import RawFiling
@@ -153,6 +156,12 @@ def cmd_report(args: argparse.Namespace) -> int:
             rows = fund_raise_pipeline(session, min_score=args.min_score)
             columns = ("company", "event_type", "stage", "issue_size", "value", "score", "date")
             title = "Fund Raise Pipeline"
+        elif args.kind == "calendar":
+            rows = upcoming_triggers_report(
+                session, within_days=args.within_days, min_confidence=args.min_confidence
+            )
+            columns = CALENDAR_COLUMNS
+            title = f"Trigger Calendar — next {args.within_days} days"
         elif args.kind == "selldown":
             rows = sell_down_pipeline(session, min_score=args.min_score)
             columns = ("company", "event_type", "seller", "stake_pct", "trigger", "value", "score")
@@ -168,6 +177,46 @@ def cmd_report(args: argparse.Namespace) -> int:
         if args.csv:
             path = write_csv(rows, args.csv, columns)
             print(f"Wrote {len(rows)} rows to {path}")
+    return 0
+
+
+def cmd_calendar(args: argparse.Namespace) -> int:
+    """Refresh, list or expire the forward deadline calendar."""
+    config = bootstrap(args)
+    create_all()
+    from .triggers.refresh import expire_triggers, refresh_calendar
+
+    offsets = dict(config.get("triggers.offsets", {}) or {})
+    rule_version = args.rule_version or config.get("triggers.rule_version", "v1")
+
+    with session_scope() as session:
+        if args.action == "refresh":
+            stats = refresh_calendar(
+                session,
+                since=_parse_date(args.from_date),
+                until=_parse_date(args.to_date),
+                company_id=args.company_id,
+                offsets=offsets or None,
+                rule_version=rule_version,
+                dry_run=args.dry_run,
+            )
+            print(json.dumps(stats.as_dict(), indent=2))
+        elif args.action == "expire":
+            print(json.dumps({"fired": expire_triggers(session)}, indent=2))
+        else:
+            rows = upcoming_triggers_report(
+                session,
+                within_days=args.within_days,
+                min_confidence=args.min_confidence,
+                trigger_types=args.types,
+            )
+            print(f"\n### Trigger Calendar — next {args.within_days} days\n")
+            print(markdown_table(rows, list(CALENDAR_COLUMNS)))
+            print()
+            if args.digest:
+                print(calendar_digest(rows))
+            if args.csv:
+                print(f"Wrote {len(rows)} rows to {write_csv(rows, args.csv, CALENDAR_COLUMNS)}")
     return 0
 
 
@@ -362,11 +411,29 @@ def build_parser() -> argparse.ArgumentParser:
     backfill.set_defaults(func=cmd_backfill)
 
     report = sub.add_parser("report", help="print a reporting view")
-    report.add_argument("kind", choices=["daily", "fundraise", "selldown", "watchlist"])
+    report.add_argument(
+        "kind", choices=["daily", "fundraise", "selldown", "watchlist", "calendar"]
+    )
     report.add_argument("--date", help="YYYY-MM-DD (daily only)")
     report.add_argument("--min-score", type=int, default=0)
     report.add_argument("--csv", help="also write the rows to this path")
+    report.add_argument("--within-days", type=int, default=90, help="calendar horizon")
+    report.add_argument("--min-confidence", type=float, default=0.0)
     report.set_defaults(func=cmd_report)
+
+    calendar = sub.add_parser("calendar", help="forward deadline calendar")
+    calendar.add_argument("action", choices=["refresh", "list", "expire"])
+    calendar.add_argument("--from", dest="from_date", help="YYYY-MM-DD")
+    calendar.add_argument("--to", dest="to_date", help="YYYY-MM-DD")
+    calendar.add_argument("--company-id", type=int)
+    calendar.add_argument("--rule-version")
+    calendar.add_argument("--within-days", type=int, default=90)
+    calendar.add_argument("--min-confidence", type=float, default=0.0)
+    calendar.add_argument("--types", nargs="+", help="filter to these trigger types")
+    calendar.add_argument("--digest", action="store_true", help="also print the bucketed digest")
+    calendar.add_argument("--csv")
+    calendar.add_argument("--dry-run", action="store_true")
+    calendar.set_defaults(func=cmd_calendar)
 
     alerts = sub.add_parser("alerts", help="inspect or flush the alert queue")
     alerts.add_argument("action", choices=["list", "flush"])

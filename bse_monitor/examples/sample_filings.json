@@ -88,5 +88,23 @@
     "headline": "Filing of Draft Red Herring Prospectus with SEBI for Initial Public Offering",
     "body_text": "The Company has filed a Draft Red Herring Prospectus (DRHP) with the Securities and Exchange Board of India in connection with its proposed Initial Public Offering comprising a fresh issue of equity shares aggregating up to Rs. 2,400 crore and an Offer for Sale of up to 3,00,00,000 equity shares by the selling shareholders including Warburg Pincus.",
     "filing_datetime": "2026-09-11T19:00:00"
+  },
+  {
+    "source": "BSE",
+    "source_filing_id": "DEMO-0011",
+    "bse_code": "543999",
+    "company_name": "Zenith Aerospace Systems Limited",
+    "headline": "Allotment of equity shares pursuant to the Initial Public Offering",
+    "body_text": "The Company has completed its Initial Public Offering. The date of allotment is 10 September, 2026 and the equity shares were listed on 14 September, 2026. Anchor investors including Warburg Pincus were allotted 1,10,00,000 equity shares at Rs. 640 per equity share. The objects of the issue include capital expenditure for setting up of a new manufacturing facility.",
+    "filing_datetime": "2026-09-10T20:15:00"
+  },
+  {
+    "source": "BSE",
+    "source_filing_id": "DEMO-0012",
+    "bse_code": "500325",
+    "company_name": "Vantage Infratech Limited",
+    "headline": "Outcome of Extraordinary General Meeting - special resolution for QIP",
+    "body_text": "The shareholders of the Company approved by way of a special resolution passed at the Extraordinary General Meeting held on 08 September, 2026 the raising of funds aggregating up to Rs. 1,200 crore by way of a Qualified Institutions Placement. The special resolution shall remain valid for a period of 365 days.",
+    "filing_datetime": "2026-09-08T19:00:00"
   }
 ]

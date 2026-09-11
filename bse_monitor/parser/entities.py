@@ -351,8 +351,20 @@ def parse_dates(text: str) -> List[tuple[dt.date, int, int]]:
     return results
 
 
+# A date appearing *before* its cue is usually part of the previous clause
+# ("...listed on 13 March. A special resolution was passed on 02 February"), so
+# backward distance is penalised rather than treated as equivalent.
+_BACKWARD_PENALTY = 4
+
+
 def _date_near(text: str, cues: Sequence[str], radius: int = 200) -> Optional[dt.date]:
-    """First date whose span sits within ``radius`` characters of a cue phrase."""
+    """The date a cue phrase refers to.
+
+    Resolution order: a date in the same sentence as the cue wins outright;
+    otherwise the nearest date within ``radius``, with backward distance
+    penalised. Sentence scoping is what stops the tail of the preceding sentence
+    from capturing the cue — the same failure the money extractor has.
+    """
     low = (text or "").lower()
     cue_positions: List[int] = []
     for cue in cues:
@@ -362,13 +374,40 @@ def _date_near(text: str, cues: Sequence[str], radius: int = 200) -> Optional[dt
             start = low.find(cue, start + 1)
     if not cue_positions:
         return None
+
     candidates = parse_dates(text)
-    best: Optional[tuple[int, dt.date]] = None
+    if not candidates:
+        return None
+
+    spans = sentence_spans(text)
+
+    def sentence_bounds(offset: int) -> tuple[int, int]:
+        for start, end, _body in spans:
+            if start <= offset < end:
+                return start, end
+        return -1, -1
+
+    def weighted(distance: int, date_start: int, cue_pos: int) -> int:
+        return distance if date_start >= cue_pos else distance * _BACKWARD_PENALTY
+
+    best_in_sentence: Optional[tuple[int, dt.date]] = None
+    best_anywhere: Optional[tuple[int, dt.date]] = None
+
     for date_value, start, _end in candidates:
-        distance = min(abs(start - pos) for pos in cue_positions)
-        if distance <= radius and (best is None or distance < best[0]):
-            best = (distance, date_value)
-    return best[1] if best else None
+        for cue_pos in cue_positions:
+            distance = abs(start - cue_pos)
+            if distance > radius:
+                continue
+            score = weighted(distance, start, cue_pos)
+            lo, hi = sentence_bounds(cue_pos)
+            if lo >= 0 and lo <= start < hi:
+                if best_in_sentence is None or score < best_in_sentence[0]:
+                    best_in_sentence = (score, date_value)
+            if best_anywhere is None or score < best_anywhere[0]:
+                best_anywhere = (score, date_value)
+
+    chosen = best_in_sentence or best_anywhere
+    return chosen[1] if chosen else None
 
 
 LOCK_IN_CUES = (
@@ -401,6 +440,51 @@ def extract_board_meeting_date(text: str) -> Optional[dt.date]:
 
 def extract_record_date(text: str) -> Optional[dt.date]:
     return _date_near(text, RECORD_DATE_CUES)
+
+
+# Anchor dates for the forward calendar. Each rule in triggers/rules.py counts
+# its statutory offset from one of these.
+ALLOTMENT_CUES = (
+    "date of allotment",
+    "allotment of equity shares",
+    "allotted on",
+    "basis of allotment",
+    "allotment was made",
+    "allotment date",
+)
+LISTING_CUES = (
+    "date of listing",
+    "listed on",
+    "commencement of trading",
+    "listing and trading approval",
+    "trading approval",
+    "listing date",
+)
+RESOLUTION_CUES = (
+    "special resolution",
+    "shareholders approved",
+    "passed by the shareholders",
+    "postal ballot",
+    "extra-ordinary general meeting",
+    "extraordinary general meeting",
+    "annual general meeting",
+)
+
+
+def extract_allotment_date(text: str) -> Optional[dt.date]:
+    return _date_near(text, ALLOTMENT_CUES)
+
+
+def extract_listing_date(text: str) -> Optional[dt.date]:
+    return _date_near(text, LISTING_CUES)
+
+
+def extract_resolution_date(text: str) -> Optional[dt.date]:
+    return _date_near(text, RESOLUTION_CUES)
+
+
+# Public alias so the triggers package does not import a private name.
+date_near = _date_near
 
 
 # --------------------------------------------------------------------------
@@ -592,6 +676,9 @@ class ExtractionResult:
     lock_in_expiry_date: Optional[dt.date] = None
     board_meeting_date: Optional[dt.date] = None
     record_date: Optional[dt.date] = None
+    allotment_date: Optional[dt.date] = None
+    listing_date: Optional[dt.date] = None
+    resolution_date: Optional[dt.date] = None
     investors: List[EntityMention] = dataclasses.field(default_factory=list)
     promoters: List[EntityMention] = dataclasses.field(default_factory=list)
     promoter_involved: bool = False
@@ -632,6 +719,9 @@ def extract_all(
     result.lock_in_expiry_date = extract_lock_in_expiry(cleaned)
     result.board_meeting_date = extract_board_meeting_date(cleaned)
     result.record_date = extract_record_date(cleaned)
+    result.allotment_date = extract_allotment_date(cleaned)
+    result.listing_date = extract_listing_date(cleaned)
+    result.resolution_date = extract_resolution_date(cleaned)
 
     if matcher is not None:
         known = matcher.match_known(cleaned)

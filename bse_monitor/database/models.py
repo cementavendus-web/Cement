@@ -10,7 +10,7 @@ otherwise require a migration for every new category).
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy import (
     JSON,
@@ -61,6 +61,28 @@ TRANSACTION_TYPES = (
     "OTHER",
 )
 
+# Forward-calendar deadline types. Each maps to exactly one rule in
+# bse_monitor/triggers/rules.py.
+TRIGGER_TYPES = (
+    "ANCHOR_LOCKIN_30D",
+    "ANCHOR_LOCKIN_90D",
+    "PREIPO_LOCKIN_6M",
+    "PROMOTER_EXCESS_LOCKIN_6M",
+    "PROMOTER_MPC_LOCKIN_18M",
+    "CAPEX_OBJECTS_1Y",
+    "CAPEX_OBJECTS_3Y",
+    "MPS_COMPLIANCE_25PCT",
+    "QIP_RESOLUTION_EXPIRY_365D",
+    "TRADING_WINDOW_REOPEN_48H",
+)
+TRIGGER_STATUSES = ("PENDING", "FIRED", "SUPERSEDED", "CANCELLED")
+# What the offset is counted from.
+ANCHOR_BASES = ("ALLOTMENT", "LISTING", "RESOLUTION", "RESULTS_DECLARED", "FILING", "WATCHLIST")
+SUBJECT_TYPES = ("ANCHOR_INVESTOR", "PREIPO_SHAREHOLDER", "PROMOTER", "COMPANY", "UNKNOWN")
+
+LLM_MODES = ("SYNC", "BATCH")
+LLM_STATUSES = ("PENDING", "SUBMITTED", "OK", "FAILED", "SKIPPED")
+
 
 class TimestampMixin:
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -90,6 +112,7 @@ class Company(Base, TimestampMixin):
 
     filings = relationship("EventFiling", back_populates="company")
     promoters = relationship("Promoter", back_populates="company")
+    upcoming_triggers = relationship("UpcomingTrigger", back_populates="company")
 
     __table_args__ = (
         UniqueConstraint("normalized_name", name="uq_companies_normalized_name"),
@@ -154,6 +177,11 @@ class EventFiling(Base, TimestampMixin):
         "FilingPromoter", back_populates="filing", cascade="all, delete-orphan"
     )
     alerts = relationship("DailyAlert", back_populates="filing", cascade="all, delete-orphan")
+    # No delete-orphan: a deadline outlives the filing that revealed it.
+    derived_triggers = relationship("UpcomingTrigger", back_populates="source_filing")
+    llm_extractions = relationship(
+        "LlmExtraction", back_populates="filing", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -309,6 +337,9 @@ class DailyAlert(Base, TimestampMixin):
     id = Column(Integer, primary_key=True)
     alert_date = Column(Date, nullable=False, index=True)
     filing_id = Column(Integer, ForeignKey("event_filings.id", ondelete="CASCADE"), index=True)
+    # A calendar deadline can raise an alert with no filing behind it, so this
+    # and filing_id are both nullable and exactly one is set per alert.
+    trigger_id = Column(Integer, ForeignKey("upcoming_triggers.id", ondelete="CASCADE"), index=True)
     priority = Column(String(8), nullable=False, default="LOW")
     channel = Column(String(16), nullable=False)  # email|slack|teams|csv
     status = Column(String(16), nullable=False, default="PENDING")  # PENDING|SENT|FAILED|SKIPPED
@@ -316,10 +347,13 @@ class DailyAlert(Base, TimestampMixin):
     body = Column(Text)
     sent_at = Column(DateTime(timezone=True))
     error = Column(Text)
-    # (filing, channel) pair; prevents re-alerting on a re-scrape of the same filing.
+    # (filing, channel) for filing alerts, or (trigger, horizon, channel) for
+    # calendar reminders — the horizon component is what lets a T-30 and a T-7
+    # reminder for the same deadline coexist without either suppressing the other.
     dedupe_key = Column(String(96), nullable=False, unique=True, index=True)
 
     filing = relationship("EventFiling", back_populates="alerts")
+    trigger = relationship("UpcomingTrigger", back_populates="alerts")
 
     __table_args__ = (
         CheckConstraint("priority IN " + str(PRIORITIES), name="ck_alerts_priority"),
@@ -358,6 +392,171 @@ class AuditLog(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
+class UpcomingTrigger(Base, TimestampMixin):
+    """A dated, forward-looking deadline derived from a filing.
+
+    This is deliberately NOT hung off ``Transaction``: ``replace_transactions()``
+    deletes and re-inserts transaction rows on every re-extraction, so a calendar
+    keyed to them would lose identity — and its alert history — on every run.
+    Identity here comes from the *filing facts* via ``dedupe_key``, so re-deriving
+    the same deadline finds the same row.
+
+    ``days_to_trigger`` is never stored. It is computed against an injected
+    ``as_of`` so queries stay deterministic in tests, and because date arithmetic
+    differs between SQLite and PostgreSQL a stored/hybrid column would pass tests
+    and fail in production.
+    """
+
+    __tablename__ = "upcoming_triggers"
+
+    id = Column(Integer, primary_key=True)
+    company_id = Column(
+        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    # SET NULL, not CASCADE: deleting a filing must never delete a live deadline.
+    source_filing_id = Column(
+        Integer, ForeignKey("event_filings.id", ondelete="SET NULL"), index=True
+    )
+
+    trigger_type = Column(String(48), nullable=False, index=True)
+    # Whose shares are released. normalize_name() of the holder, or "" for a
+    # company-wide deadline. NOT NULL because NULL never equals NULL in a unique
+    # index — a nullable key component would silently permit duplicates.
+    subject_key = Column(String(128), nullable=False, default="", server_default="")
+    subject_name = Column(String(256))
+    subject_type = Column(String(32), nullable=False, default="COMPANY")
+
+    anchor_date = Column(Date, nullable=False, index=True)
+    anchor_basis = Column(String(32), nullable=False)
+    # Only populated for the 48-hour trading-window rule, which needs wall-clock.
+    anchor_datetime = Column(DateTime(timezone=True))
+
+    trigger_date = Column(Date, nullable=False, index=True)
+    trigger_datetime = Column(DateTime(timezone=True))
+    offset_days = Column(Integer)
+
+    rule_version = Column(String(16), nullable=False, default="v1")
+    status = Column(String(16), nullable=False, default="PENDING", index=True)
+    superseded_by_id = Column(
+        Integer, ForeignKey("upcoming_triggers.id", ondelete="SET NULL")
+    )
+
+    confidence = Column(Float, default=0.0, nullable=False)
+    num_shares = Column(Numeric(20, 2))
+    percent_of_equity = Column(Float)
+    amount_inr = Column(Numeric(20, 2))
+
+    evidence = Column(JSONType, default=dict)
+    notes = Column(Text)
+    # When this deadline first became knowable — the filing date behind it. The
+    # point-in-time guard the ML panel filters on, so a model never sees a
+    # deadline before the market could have.
+    known_from_date = Column(Date, index=True)
+    fired_at = Column(DateTime(timezone=True))
+
+    dedupe_key = Column(String(64), nullable=False, unique=True, index=True)
+
+    company = relationship("Company", back_populates="upcoming_triggers")
+    source_filing = relationship("EventFiling", back_populates="derived_triggers")
+    alerts = relationship("DailyAlert", back_populates="trigger")
+
+    __table_args__ = (
+        CheckConstraint("trigger_type IN " + str(TRIGGER_TYPES), name="ck_triggers_type"),
+        CheckConstraint("status IN " + str(TRIGGER_STATUSES), name="ck_triggers_status"),
+        CheckConstraint("anchor_basis IN " + str(ANCHOR_BASES), name="ck_triggers_basis"),
+        CheckConstraint("subject_type IN " + str(SUBJECT_TYPES), name="ck_triggers_subject"),
+        # Every rule is a forward offset; a backwards deadline is a bug.
+        CheckConstraint("trigger_date >= anchor_date", name="ck_triggers_forward"),
+        UniqueConstraint(
+            "company_id",
+            "trigger_type",
+            "anchor_date",
+            "subject_key",
+            "rule_version",
+            name="uq_triggers_natural",
+        ),
+        Index("ix_triggers_status_date", "status", "trigger_date"),
+        Index("ix_triggers_company_type", "company_id", "trigger_type"),
+    )
+
+    def days_to(self, as_of: Optional[dt.date] = None) -> int:
+        """Days from ``as_of`` to the deadline; negative once it has passed.
+
+        A method rather than a property: a zero-argument property would have to
+        call ``date.today()`` and make every test time-dependent.
+        """
+        return (self.trigger_date - (as_of or dt.date.today())).days
+
+    def __repr__(self) -> str:  # pragma: no cover - debug aid
+        return f"<UpcomingTrigger {self.trigger_type} {self.trigger_date} {self.status}>"
+
+
+class LlmExtraction(Base, TimestampMixin):
+    """One LLM pass over one announcement.
+
+    ``announcement_id`` is uniquely constrained, which is what makes "a filing is
+    never sent twice" a database guarantee rather than application bookkeeping —
+    a crash between the check and the call cannot cause a re-send, and therefore
+    cannot cause a double charge.
+    """
+
+    __tablename__ = "llm_extractions"
+
+    id = Column(Integer, primary_key=True)
+    filing_id = Column(
+        Integer, ForeignKey("event_filings.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    announcement_id = Column(String(160), nullable=False, unique=True, index=True)
+    source = Column(String(8), nullable=False, default="BSE")
+
+    model = Column(String(64), nullable=False)
+    prompt_version = Column(String(16), nullable=False, default="v1")
+    mode = Column(String(16), nullable=False, default="SYNC")
+    status = Column(String(16), nullable=False, default="PENDING", index=True)
+
+    batch_id = Column(String(96), index=True)
+    # What batch results are keyed by. Results arrive in arbitrary order.
+    custom_id = Column(String(96), index=True)
+    request_fingerprint = Column(String(64))
+    # "pages:1-3" normally; "char_budget" when only joined cached text existed.
+    page_slice = Column(String(32))
+
+    event_class = Column(String(32))
+    holder = Column(String(256))
+    holder_normalized = Column(String(256), index=True)
+    holder_type = Column(String(32))
+    stake_pct = Column(Float)
+    effective_date = Column(Date)
+    llm_confidence = Column(Float)
+
+    parsed = Column(JSONType, default=dict)
+    raw_response = Column(JSONType, default=dict)
+
+    input_tokens = Column(Integer, default=0)
+    output_tokens = Column(Integer, default=0)
+    cache_creation_input_tokens = Column(Integer, default=0)
+    cache_read_input_tokens = Column(Integer, default=0)
+    cost_usd = Column(Numeric(12, 6), default=0)
+
+    latency_ms = Column(Integer)
+    attempts = Column(Integer, default=0)
+    error = Column(Text)
+    requested_at = Column(DateTime(timezone=True))
+    completed_at = Column(DateTime(timezone=True))
+
+    filing = relationship("EventFiling", back_populates="llm_extractions")
+
+    __table_args__ = (
+        CheckConstraint("mode IN " + str(LLM_MODES), name="ck_llm_mode"),
+        CheckConstraint("status IN " + str(LLM_STATUSES), name="ck_llm_status"),
+        CheckConstraint("source IN " + str(SOURCES), name="ck_llm_source"),
+        Index("ix_llm_status_model", "status", "model"),
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover - debug aid
+        return f"<LlmExtraction {self.announcement_id} {self.status}>"
+
+
 def utcnow() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
@@ -375,7 +574,15 @@ __all__: list[str] = [
     "DailyAlert",
     "ScrapeRun",
     "AuditLog",
+    "UpcomingTrigger",
+    "LlmExtraction",
     "CATEGORIES",
+    "TRIGGER_TYPES",
+    "TRIGGER_STATUSES",
+    "ANCHOR_BASES",
+    "SUBJECT_TYPES",
+    "LLM_MODES",
+    "LLM_STATUSES",
     "PRIORITIES",
     "TRANSACTION_TYPES",
     "utcnow",

@@ -14,6 +14,7 @@ import re
 from typing import Any, Dict, Iterable, Optional, Sequence
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .models import (
@@ -25,9 +26,11 @@ from .models import (
     FilingInvestor,
     FilingPromoter,
     Investor,
+    LlmExtraction,
     Promoter,
     ScrapeRun,
     Transaction,
+    UpcomingTrigger,
 )
 
 log = logging.getLogger(__name__)
@@ -308,19 +311,35 @@ def replace_transactions(
 def queue_alert(
     session: Session,
     *,
-    filing_id: int,
     alert_date: dt.date,
     priority: str,
     channel: str,
     title: str,
     body: str,
+    filing_id: Optional[int] = None,
+    trigger_id: Optional[int] = None,
+    horizon: Optional[int] = None,
 ) -> tuple[DailyAlert, bool]:
-    dedupe_key = f"{filing_id}:{channel}"
+    """Queue one alert, deduplicated.
+
+    Filing alerts key on ``(filing, channel)`` exactly as before. Calendar
+    reminders key on ``(trigger, horizon, channel)`` so that a T-30 and a T-7
+    reminder for the same deadline can both fire, while re-running either is
+    still a no-op.
+    """
+    if filing_id is not None:
+        dedupe_key = f"{filing_id}:{channel}"
+    elif trigger_id is not None:
+        dedupe_key = f"trigger:{trigger_id}:T-{horizon if horizon is not None else 0}:{channel}"
+    else:
+        raise ValueError("queue_alert needs either filing_id or trigger_id")
+
     alert = session.scalar(select(DailyAlert).where(DailyAlert.dedupe_key == dedupe_key))
     if alert is not None:
         return alert, False
     alert = DailyAlert(
         filing_id=filing_id,
+        trigger_id=trigger_id,
         alert_date=alert_date,
         priority=priority,
         channel=channel,
@@ -408,4 +427,282 @@ def counts(session: Session) -> Dict[str, int]:
         "documents": session.scalar(select(func.count()).select_from(FilingDocument)) or 0,
         "transactions": session.scalar(select(func.count()).select_from(Transaction)) or 0,
         "alerts": session.scalar(select(func.count()).select_from(DailyAlert)) or 0,
+        "triggers": session.scalar(select(func.count()).select_from(UpcomingTrigger)) or 0,
+        "llm_extractions": session.scalar(select(func.count()).select_from(LlmExtraction)) or 0,
+    }
+
+
+# --------------------------------------------------------------------------
+# Upcoming triggers (forward calendar)
+# --------------------------------------------------------------------------
+def upsert_trigger(session: Session, payload: Dict[str, Any]) -> tuple[UpcomingTrigger, bool]:
+    """Insert or update a deadline, keyed on ``dedupe_key``.
+
+    Deliberately the opposite of :func:`replace_transactions`: a deadline is
+    updated in place, never deleted and recreated, so its id — and the alert
+    history pointing at it — survives every re-derivation.
+    """
+    key = payload["dedupe_key"]
+    trigger = session.scalar(select(UpcomingTrigger).where(UpcomingTrigger.dedupe_key == key))
+    created = trigger is None
+    if trigger is None:
+        trigger = UpcomingTrigger(dedupe_key=key)
+        session.add(trigger)
+
+    for field, value in payload.items():
+        if field == "dedupe_key":
+            continue
+        # Skip None so a later, sparser pass never nulls richer earlier data.
+        if hasattr(trigger, field) and value is not None:
+            setattr(trigger, field, value)
+
+    session.flush()
+    audit(
+        session,
+        "upcoming_trigger",
+        str(trigger.id),
+        "created" if created else "updated",
+        {"type": trigger.trigger_type, "date": str(trigger.trigger_date)},
+    )
+    return trigger, created
+
+
+def triggers_for_filing(
+    session: Session,
+    source_filing_id: int,
+    statuses: Sequence[str] = ("PENDING",),
+) -> list[UpcomingTrigger]:
+    return list(
+        session.scalars(
+            select(UpcomingTrigger).where(
+                UpcomingTrigger.source_filing_id == source_filing_id,
+                UpcomingTrigger.status.in_(tuple(statuses)),
+            )
+        )
+    )
+
+
+def cancel_triggers(session: Session, *, source_filing_id: int, keep_keys: set[str]) -> int:
+    """Cancel deadlines this filing no longer implies.
+
+    Cancelled, never deleted: a deleted row would lose the alert history that
+    references it and would re-fire a reminder on the next refresh.
+    """
+    cancelled = 0
+    for trigger in triggers_for_filing(session, source_filing_id):
+        if trigger.dedupe_key not in keep_keys:
+            trigger.status = "CANCELLED"
+            cancelled += 1
+            audit(session, "upcoming_trigger", str(trigger.id), "cancelled", {})
+    session.flush()
+    return cancelled
+
+
+def supersede_trigger(session: Session, old: UpcomingTrigger, new: UpcomingTrigger) -> None:
+    old.status = "SUPERSEDED"
+    old.superseded_by_id = new.id
+    session.flush()
+    audit(session, "upcoming_trigger", str(old.id), "superseded", {"by": new.id})
+
+
+def mark_trigger(
+    session: Session,
+    trigger: UpcomingTrigger,
+    status: str,
+    fired_at: Optional[dt.datetime] = None,
+) -> None:
+    trigger.status = status
+    if status == "FIRED":
+        trigger.fired_at = fired_at or dt.datetime.now(dt.timezone.utc)
+    session.flush()
+
+
+def triggers_due(
+    session: Session,
+    *,
+    as_of: Optional[dt.date] = None,
+    within_days: int = 90,
+    statuses: Sequence[str] = ("PENDING",),
+    company_id: Optional[int] = None,
+    trigger_types: Optional[Sequence[str]] = None,
+    min_confidence: float = 0.0,
+    limit: int = 500,
+) -> list[tuple[UpcomingTrigger, int]]:
+    """Deadlines falling inside the horizon, with days-to-trigger computed.
+
+    The day count is computed in Python against an injected ``as_of`` rather than
+    in SQL: date arithmetic differs between SQLite and PostgreSQL, so a SQL
+    expression here would pass the tests and misbehave in production.
+    """
+    today = as_of or dt.date.today()
+    horizon = today + dt.timedelta(days=within_days)
+    stmt = (
+        select(UpcomingTrigger)
+        .where(
+            UpcomingTrigger.status.in_(tuple(statuses)),
+            UpcomingTrigger.trigger_date >= today,
+            UpcomingTrigger.trigger_date <= horizon,
+            UpcomingTrigger.confidence >= min_confidence,
+        )
+        .order_by(UpcomingTrigger.trigger_date, UpcomingTrigger.company_id)
+        .limit(limit)
+    )
+    if company_id is not None:
+        stmt = stmt.where(UpcomingTrigger.company_id == company_id)
+    if trigger_types:
+        stmt = stmt.where(UpcomingTrigger.trigger_type.in_(tuple(trigger_types)))
+
+    return [(row, row.days_to(today)) for row in session.scalars(stmt)]
+
+
+def expire_triggers(session: Session, *, as_of: Optional[dt.date] = None) -> int:
+    """Move PENDING deadlines whose date has passed to FIRED."""
+    today = as_of or dt.date.today()
+    fired = 0
+    for trigger in session.scalars(
+        select(UpcomingTrigger).where(
+            UpcomingTrigger.status == "PENDING", UpcomingTrigger.trigger_date < today
+        )
+    ):
+        mark_trigger(session, trigger, "FIRED")
+        fired += 1
+    return fired
+
+
+# --------------------------------------------------------------------------
+# LLM extractions
+# --------------------------------------------------------------------------
+def llm_extraction_by_announcement(
+    session: Session, announcement_id: str
+) -> Optional[LlmExtraction]:
+    return session.scalar(
+        select(LlmExtraction).where(LlmExtraction.announcement_id == announcement_id)
+    )
+
+
+def claim_llm_extraction(
+    session: Session,
+    *,
+    filing_id: int,
+    announcement_id: str,
+    source: str,
+    model: str,
+    prompt_version: str,
+    mode: str = "SYNC",
+    custom_id: Optional[str] = None,
+    request_fingerprint: Optional[str] = None,
+) -> tuple[LlmExtraction, bool]:
+    """Reserve the right to call the API for this announcement.
+
+    Returns ``(row, created)``. ``created is False`` means the announcement has
+    already been sent and must not be sent again.
+
+    The claim is written and flushed *before* the API call, and the uniqueness of
+    ``announcement_id`` is enforced by the database rather than by a prior SELECT:
+    a check-then-insert leaves a race under concurrent runs, and a crash between
+    the two statements would cause a re-send and a double charge.
+    """
+    existing = llm_extraction_by_announcement(session, announcement_id)
+    if existing is not None:
+        return existing, False
+
+    row = LlmExtraction(
+        filing_id=filing_id,
+        announcement_id=announcement_id,
+        source=source,
+        model=model,
+        prompt_version=prompt_version,
+        mode=mode,
+        status="PENDING",
+        custom_id=custom_id,
+        request_fingerprint=request_fingerprint,
+        requested_at=dt.datetime.now(dt.timezone.utc),
+        attempts=0,
+    )
+    session.add(row)
+    try:
+        with session.begin_nested():
+            session.flush()
+    except IntegrityError:
+        # Lost the race: another worker claimed it between the SELECT and here.
+        session.expunge(row)
+        winner = llm_extraction_by_announcement(session, announcement_id)
+        if winner is not None:
+            return winner, False
+        raise
+    return row, True
+
+
+def record_llm_result(
+    session: Session,
+    row: LlmExtraction,
+    *,
+    call: Any = None,
+    verdict: Any = None,
+    status: str = "OK",
+    error: Optional[str] = None,
+    persist_raw: bool = True,
+) -> None:
+    row.status = status
+    row.error = error
+    row.completed_at = dt.datetime.now(dt.timezone.utc)
+
+    if call is not None:
+        usage = getattr(call, "usage", None)
+        if usage is not None:
+            row.input_tokens = usage.input_tokens
+            row.output_tokens = usage.output_tokens
+            row.cache_creation_input_tokens = usage.cache_creation_input_tokens
+            row.cache_read_input_tokens = usage.cache_read_input_tokens
+        row.cost_usd = getattr(call, "cost_usd", 0) or 0
+        row.latency_ms = getattr(call, "latency_ms", None)
+        row.attempts = getattr(call, "attempts", row.attempts or 0)
+        row.model = getattr(call, "model", row.model) or row.model
+        if persist_raw:
+            row.raw_response = getattr(call, "response_json", {}) or {}
+
+    if verdict is not None:
+        row.event_class = verdict.event_class
+        row.holder = verdict.holder
+        row.holder_normalized = normalize_name(verdict.holder or "")
+        row.holder_type = verdict.holder_type
+        row.stake_pct = verdict.stake_pct
+        row.effective_date = verdict.effective_date
+        row.llm_confidence = verdict.confidence
+        row.parsed = verdict.to_dict()
+
+    session.flush()
+
+
+def llm_rows_for_batch(session: Session, batch_id: str) -> list[LlmExtraction]:
+    return list(
+        session.scalars(select(LlmExtraction).where(LlmExtraction.batch_id == batch_id))
+    )
+
+
+def reset_llm_row(session: Session, row: LlmExtraction, reason: str) -> None:
+    """Return a row to PENDING so a later run retries it."""
+    row.status = "PENDING"
+    row.error = reason
+    row.batch_id = None
+    row.attempts = (row.attempts or 0) + 1
+    session.flush()
+
+
+def llm_usage_summary(session: Session, since: Optional[dt.date] = None) -> Dict[str, Any]:
+    stmt = select(LlmExtraction)
+    if since:
+        stmt = stmt.where(LlmExtraction.created_at >= dt.datetime.combine(since, dt.time.min))
+    rows = list(session.scalars(stmt))
+    reads = sum(r.cache_read_input_tokens or 0 for r in rows)
+    inputs = sum(r.input_tokens or 0 for r in rows)
+    return {
+        "calls": len(rows),
+        "ok": sum(1 for r in rows if r.status == "OK"),
+        "failed": sum(1 for r in rows if r.status == "FAILED"),
+        "input_tokens": inputs,
+        "output_tokens": sum(r.output_tokens or 0 for r in rows),
+        "cache_read_tokens": reads,
+        "cache_hit_rate": round(reads / (reads + inputs), 4) if (reads + inputs) else 0.0,
+        "cost_usd": round(float(sum(float(r.cost_usd or 0) for r in rows)), 4),
     }
