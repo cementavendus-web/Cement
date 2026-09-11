@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import dataclasses
-import datetime as dt
+
 import logging
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List
 
 from sqlalchemy.orm import Session
 
