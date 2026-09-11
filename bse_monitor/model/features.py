@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime as dt
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
