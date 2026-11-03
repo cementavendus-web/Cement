@@ -139,3 +139,8 @@ Each presentation from Q3 FY25 onward has a "Restructuring" section, and from Q4
 - TEIL stock-exchange filings: https://www.trivenigroup.com/shareholders-information?q=stock-exchange-filings
 - TEIL scheme-of-arrangement documents: https://www.trivenigroup.com/shareholders-information?q=clause-46-of-lodr
 - TPTL investor pages: https://www.trivenipowertransmission.com/investors-overview.html and https://www.trivenipowertransmission.com/shareholders-information.html
+
+## Local copies (downloaded 3 Nov 2026)
+- `transcripts/`: 9 earnings call transcripts. Eight are TEIL calls from Q2 FY25 (the last call before the announcement) to Q1 FY27. The ninth is TPTL's first call (Q2 FY27).
+- `presentations/`: 14 files. They are the TEIL investor presentations from Q3 FY25 to Q2 FY27, the Q4 FY25 and Q4 FY26 investor briefs, the Q1 FY27 press release, the FY26 annual report restructuring chapter, and TPTL's Q2 FY27 presentation and press release.
+- Some exchange copies combine the investor brief and the deck in one PDF (for example, Q3 FY25 and Q2 FY27).
